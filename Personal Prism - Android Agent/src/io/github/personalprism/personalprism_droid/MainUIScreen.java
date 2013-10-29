@@ -1,4 +1,4 @@
-package change_me_one_day.personalprism_droid;
+package io.github.personalprism.personalprism_droid;
 
 import android.os.Bundle;
 import android.app.Activity;
