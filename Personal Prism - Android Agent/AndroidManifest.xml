@@ -10,8 +10,9 @@
 
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="change_me_one_day.personalprism_droid" >
+        android:targetPackage="io.github.personalprism.personalprism_droid" >
     </instrumentation>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application>
         <uses-library android:name="android.test.runner" >
@@ -21,7 +22,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" android:allowClearUserData="true" android:killAfterRestore="true" android:restoreAnyVersion="false">
         <activity
-            android:name="change_me_one_day.personalprism_droid.MainUIScreen"
+            android:name="io.github.personalprism.personalprism_droid.MainUIScreen"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,6 +30,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".DbHandler" />
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
     </application>
 
 </manifest>
