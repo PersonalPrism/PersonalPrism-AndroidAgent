@@ -1,44 +1,44 @@
 package io.github.personalprism.personalprism_droid;
 
-import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.location.LocationRequest;
 import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import java.util.Observable;
-import android.location.Location;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import java.util.Observable;
 
 /**
- * Handles the constant gathering of location data. 
- * Create from a service or activity context by calling: 
+ * Handles the constant gathering of location data.
+ * Create from a service or activity context by calling:
  * new LocationService(this.getApplicationContext()); Your source must implement
  * Observer architecture, and after instantiating LocationService, call
  * locationService.addObserver(this); You will receive location updates in your
  * implemented update method.
- * 
+ *
  * @author Stuart Harvey (stu)
  * @version 2013.11.9
  */
-public class LocationService
+public class LocationSource
     extends Observable
     implements ConnectionCallbacks, OnConnectionFailedListener,
     LocationListener
 {
-    private Location        currentLocation;
+//    private Location        currentLocation;
     private LocationRequest requester;
     private LocationClient  client;
 
 
     /**
      * Pass a context to begin location updates.
-     * 
+     *
      * @param context
      *            the context the listener is started from.
      */
-    public LocationService(Context context)
+    public LocationSource(Context context)
     {
         // create a new location requester, set priority and request interval
         requester = LocationRequest.create();
@@ -55,33 +55,34 @@ public class LocationService
 
     /**
      * Called when the phone's location updates. (DO NOT CALL)
-     * 
+     *
      * @param location
      *            the new location data.
      */
     @Override
     public void onLocationChanged(Location location)
     {
-        currentLocation = location;
-        notifyObservers();
+//        currentLocation = location;
+//        notifyObservers();
+        notifyObservers(location);
     }
 
 
-    /**
-     * Returns the most recent location value.
-     * 
-     * @return the last location if there is one.
-     */
-    public Location getLocation()
-    {
-        return currentLocation;
-    }
+//    /**
+//     * Returns the most recent location value.
+//     *
+//     * @return the last location if there is one.
+//     */
+//    public Location getLocation()
+//    {
+//        return currentLocation;
+//    }
 
 
     /**
      * If the connection to google maps fails, handle it appropriately. (DO NOT
      * CALL)
-     * 
+     *
      * @param result
      *            the result of the failed connection.
      */
@@ -94,7 +95,7 @@ public class LocationService
 
     /**
      * Called automatically when the client successfully connects (DO NOT CALL).
-     * 
+     *
      * @param connectionHint
      *            the data bundle for the connection.
      */
@@ -123,4 +124,6 @@ public class LocationService
     {
         client.disconnect();
     }
+
+
 }
