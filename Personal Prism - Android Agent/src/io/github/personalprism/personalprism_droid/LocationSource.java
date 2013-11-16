@@ -62,21 +62,9 @@ public class LocationSource
     @Override
     public void onLocationChanged(Location location)
     {
-//        currentLocation = location;
-//        notifyObservers();
+        setChanged();
         notifyObservers(location);
     }
-
-
-//    /**
-//     * Returns the most recent location value.
-//     *
-//     * @return the last location if there is one.
-//     */
-//    public Location getLocation()
-//    {
-//        return currentLocation;
-//    }
 
 
     /**
@@ -124,6 +112,4 @@ public class LocationSource
     {
         client.disconnect();
     }
-
-
 }
