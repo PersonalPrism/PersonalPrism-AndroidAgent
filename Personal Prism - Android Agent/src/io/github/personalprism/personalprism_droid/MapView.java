@@ -1,9 +1,12 @@
 package io.github.personalprism.personalprism_droid;
 
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Marker;
+import java.util.ArrayList;
 import sofia.app.Screen;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.GoogleMapOptions;
-import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,11 +26,15 @@ import java.util.Observer;
  */
 public class MapView
     extends Screen
-    implements Observer
+    implements Observer, OnMarkerClickListener
 {
     private GoogleMap      map;
     private LocationSource source;
-
+    private ArrayList<Node> data;
+    
+    private boolean hasFirstPoint;
+    private ArrayList<LatLng> points;
+    private Polyline line;
 
     /**
      * Creates a google map view, adds location gatherer.
@@ -45,9 +52,15 @@ public class MapView
         map =
             ((MapFragment)getFragmentManager().findFragmentById(R.id.map))
                 .getMap();
+        map.setOnMarkerClickListener(this);
+        
+        data = new ArrayList<Node>(0);
 
         source = new LocationSource(this);
         source.addObserver(this);
+        
+        hasFirstPoint = false;
+        points = new ArrayList<LatLng>(0);
     }
 
 
@@ -63,10 +76,16 @@ public class MapView
     public void update(Observable locationSource, Object location)
     {
         Location loc = (Location)location;
-        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(loc
-            .getLatitude(), loc.getLongitude())));
+        data.add(new Node(loc));
+        
+        // center camera
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc
+            .getLatitude(), loc.getLongitude()), 18));
 
         drawCircle(loc);
+        drawMarker(loc);
+        drawLine(new LatLng(loc.getLatitude(), loc.getLongitude()));
+
     }
 
 
@@ -86,5 +105,48 @@ public class MapView
                 .strokeWidth(0);
 
         map.addCircle(circOpt);
+    }
+    
+    private void drawMarker(Location lastLocation)
+    {
+        LatLng latlng =
+            new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        Node latestNode = data.get(data.size() - 1);
+        
+        map.addMarker(new MarkerOptions()
+            .position(latlng)
+            .draggable(false)
+            .title(latestNode.getDate().toString())
+            .snippet("Latitude: " + latlng.latitude + "\nLongtidue: " + latlng.longitude)
+            .alpha(0f));
+    }
+    
+    private void drawLine(LatLng latlng)
+    {
+        points.add(latlng);
+        if (!hasFirstPoint)
+        {
+            PolylineOptions lineOptions = new PolylineOptions()
+                .add(latlng);
+            
+            line = map.addPolyline(lineOptions);
+            hasFirstPoint = true;
+        }
+        else
+        {
+            line.setPoints(points);
+        }
+    }
+
+    /**
+     * Handling for a marker click.
+     * @param marker the marker that has been clicked.
+     * @return true if using custom behavior, else false.
+     */
+    @Override
+    public boolean onMarkerClick(Marker marker)
+    {
+        marker.showInfoWindow();
+        return true;
     }
 }
