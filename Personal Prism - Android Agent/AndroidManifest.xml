@@ -24,7 +24,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:debuggable="true">
+    <application android:debuggable="true" android:icon="@drawable/ic_prism">
         <uses-library android:name="android.test.runner" >
         </uses-library>
         android:allowBackup="true"
@@ -43,7 +43,9 @@
         <service android:name=".DbHandler" />
         <activity
             android:name="io.github.personalprism.personalprism_droid.MapView"
-            android:label="Location heatmap">
+            android:label="Location heatmap"
+            android:screenOrientation="portrait"
+            android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
         
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>

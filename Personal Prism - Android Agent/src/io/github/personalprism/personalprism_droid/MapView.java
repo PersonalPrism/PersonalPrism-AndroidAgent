@@ -101,7 +101,7 @@ public class MapView
             new CircleOptions()
                 .center(
                     new LatLng(lastLocation.getLatitude(), lastLocation
-                        .getLongitude())).fillColor(0x15FF0000).radius(10)
+                        .getLongitude())).fillColor(0x15FF0000).radius(5)
                 .strokeWidth(0);
 
         map.addCircle(circOpt);
@@ -127,7 +127,8 @@ public class MapView
         if (!hasFirstPoint)
         {
             PolylineOptions lineOptions = new PolylineOptions()
-                .add(latlng);
+                .add(latlng)
+                .width(0.5f);
             
             line = map.addPolyline(lineOptions);
             hasFirstPoint = true;
