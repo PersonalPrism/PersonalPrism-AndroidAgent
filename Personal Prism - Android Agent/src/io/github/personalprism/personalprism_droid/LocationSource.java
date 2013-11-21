@@ -1,5 +1,9 @@
 package io.github.personalprism.personalprism_droid;
 
+import android.util.Log;
+import android.app.IntentService;
+import android.content.Intent;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
@@ -30,6 +34,8 @@ public class LocationSource
 //    private Location        currentLocation;
     private LocationRequest requester;
     private LocationClient  client;
+    private boolean observerRequired;
+    private PendingIntent callbackIntent;
 
 
     /**
@@ -38,18 +44,22 @@ public class LocationSource
      * @param context
      *            the context the listener is started from.
      */
-    public LocationSource(Context context)
+    public LocationSource(Context context, Class listener)
     {
+        observerRequired = ( listener == null );
         // create a new location requester, set priority and request interval
         requester = LocationRequest.create();
         requester.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         requester.setInterval(20 * 1000);
-        requester.setFastestInterval(1000);
+        requester.setFastestInterval(10000);
 
         // create the location client
         client = new LocationClient(context, this, this);
         // connect the location client
         client.connect();
+        Intent notificationIntent = new Intent(context, listener);
+        callbackIntent = PendingIntent.getService(context, 0, notificationIntent, 0);
+
     }
 
 
@@ -64,6 +74,7 @@ public class LocationSource
     {
 //        currentLocation = location;
 //        notifyObservers();
+        setChanged();
         notifyObservers(location);
     }
 
@@ -102,7 +113,9 @@ public class LocationSource
     @Override
     public void onConnected(Bundle connectionHint)
     {
-        client.requestLocationUpdates(requester, this);
+        Log.d(getClass().getSimpleName() , "connected, observer " + observerRequired);
+        if (observerRequired) client.requestLocationUpdates(requester, this);
+        else client.requestLocationUpdates(requester, callbackIntent);
     }
 
 

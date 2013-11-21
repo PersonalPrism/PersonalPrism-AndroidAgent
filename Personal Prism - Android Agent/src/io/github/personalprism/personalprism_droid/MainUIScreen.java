@@ -1,5 +1,12 @@
 package io.github.personalprism.personalprism_droid;
 
+import com.db4o.ext.StoredClass;
+import android.location.Location;
+import com.db4o.ObjectContainer;
+import com.db4o.Db4oEmbedded;
+import android.widget.TextView;
+import java.util.Observable;
+import java.util.Observer;
 import android.util.Log;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -9,19 +16,26 @@ import android.view.Menu;
 
 public class MainUIScreen
     extends Activity
+// implements Observer
 {
+
+    TextView              text;
+    private SourceManager sourceManager;
+    public static String DB4OFILENAME;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        Log.d(getPackageName(), "starting main activity");
+        DB4OFILENAME = getApplicationContext().getDir("prism_db4o", 0) + "/PersonalPrism.db4o";
+        Log.d(getClass().getSimpleName(), "starting main activity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_uiscreen);
-        Intent serviceIntent = new Intent(getApplicationContext(), DbHandler.class);
-//        serviceIntent.setComponent(new ComponentName(getApplicationContext(), DbHandler.class));
-        ComponentName component = getApplicationContext().startService(serviceIntent);
-        if (component == null) Log.e(getPackageName(), "service failed to start fail");
-        else Log.d(getPackageName(), component.toString());
+
+        text = (TextView)findViewById(R.id.text); //in case we want to output
+
+        sourceManager = new SourceManager(this);
+
+
     }
 
 
@@ -32,5 +46,7 @@ public class MainUIScreen
         getMenuInflater().inflate(R.menu.main_uiscreen, menu);
         return true;
     }
+
+
 
 }

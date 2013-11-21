@@ -1,56 +1,123 @@
 package io.github.personalprism.personalprism_droid;
 
-import java.util.Observable;
-import java.util.Observer;
-import android.util.Log;
-import android.app.Service;
+import com.db4o.ext.StoredClass;
+import android.app.IntentService;
 import android.content.Intent;
-import android.os.IBinder;
-import android.widget.Toast;
+import android.location.Location;
+import android.util.Log;
+import com.db4o.Db4oEmbedded;
+import com.db4o.ObjectContainer;
+import com.db4o.ext.DatabaseClosedException;
+import com.db4o.ext.DatabaseReadOnlyException;
+import com.google.android.gms.location.LocationClient;
 
+// -------------------------------------------------------------------------
 /**
- * Created by Hunter on 11/13/13.
+ * This class now mostly just does record creation on the db4o. Follow it with
+ * additional details about its purpose, what abstraction it represents, and how
+ * to use it.
+ *
+ * @author Hunter
+ * @version Nov 16, 2013
  */
 public class DbHandler
-    extends Service
-    implements Observer
+    extends IntentService
 {
 
-    private LocationSource locationSource;
-    public LocationSource getLocationSource()
+    /**
+     * Create a new DbHandler object.
+     *
+     * @param name the name
+     */
+    public DbHandler(String name) // I don't know if anything needs done here.
     {
-        return locationSource;
+        super("DbHandler");
+        // TODO Auto-generated constructor stub
+    }
+
+    public DbHandler()
+    {
+        super("DbHandler");
     }
 
 
-    public IBinder onBind(Intent intent)
+    private ObjectContainer     db;
+
+
+    /**
+     * Here, onHandleIntent tries to retrieve a location from the intent and
+     * store it.
+     * This definitely needs to be generalized later and support more than
+     * requested location updates.
+     *
+     * @param intent the intent
+     */
+    @SuppressWarnings("cast")
+    @Override
+    protected void onHandleIntent(Intent intent)
     {
-        return null;
+
+        Log.d(getClass().getSimpleName() ,"intent handling, " + intent.toString());
+
+        try
+        {
+            db.store(((Location)intent
+                .getParcelableExtra(LocationClient.KEY_LOCATION_CHANGED)));
+            Log.d(getClass().getSimpleName(), "logging " + (Location)intent
+                .getParcelableExtra(LocationClient.KEY_LOCATION_CHANGED));
+        }
+        catch (DatabaseClosedException e)
+        {
+            Log.e(getClass().getSimpleName(), "db exception in onHandleIntent", e);
+        }
+        catch (DatabaseReadOnlyException e)
+        {
+            Log.e(getClass().getSimpleName(), "db exception in onHandleIntent", e);
+        }
+        catch (ClassCastException e)
+        {
+            Log.e(
+                getClass().getSimpleName(),
+                "Exception from casting a parcelable extra to a Location",
+                e);
+        }
     }
 
 
-    public int onStartCommand(Intent intent, int flags, int startId)
+    // ----------------------------------------------------------
+    @Override
+    public void onCreate()
     {
-        Log.d(getPackageName(), "starting service");
-//        new LocationSource(getApplicationContext()).addObserver(this);
-        locationSource = new LocationSource(getApplicationContext());
-        locationSource.addObserver(this);
-
-        return Service.START_NOT_STICKY;
+        super.onCreate();
+        Log.d(getClass().getSimpleName(), "try db open");
+        db =
+            Db4oEmbedded
+                .openFile(Db4oEmbedded.newConfiguration(), MainUIScreen.DB4OFILENAME);
+        Log.d(getClass().getSimpleName(),"db open, " + db.toString());
     }
 
 
+    // ----------------------------------------------------------
     @Override
     public void onDestroy()
     {
-        Log.d(getPackageName(), "stopping service");
         super.onDestroy();
+        Log.d(getClass().getSimpleName(),"db close with " + records(db) + " records");
+        db.close();
     }
 
-
-    @Override
-    public void update(Observable observable, Object data)
+    public static int records(ObjectContainer db)
     {
-        Log.d(getPackageName(), data.toString());
+        int records = 0;
+        for(StoredClass storedClass : db.ext().storedClasses()){
+            // Filter out db4o internal objects
+            // and filter out object which have a parent-class, because these are in the count of the parent
+            if(!storedClass.getName().startsWith("com.db4o") &&
+                    null==storedClass.getParentStoredClass()) {
+                records += storedClass.instanceCount();
+            }
+        }
+        return records;
     }
+
 }
