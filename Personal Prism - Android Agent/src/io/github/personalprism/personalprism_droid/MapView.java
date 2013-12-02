@@ -58,7 +58,7 @@ public class MapView
         
         data = new ArrayList<Node>(0);
 
-        source = new LocationSource(this);
+        source = new LocationSource(this, null);
         source.addObserver(this);
         
         hasFirstPoint = false;
