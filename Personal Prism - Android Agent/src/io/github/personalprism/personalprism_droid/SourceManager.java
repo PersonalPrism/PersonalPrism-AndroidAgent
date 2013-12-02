@@ -9,6 +9,7 @@ import java.util.Observer;
 /**
  * The Class SourceManager.
  * This is going to handle the data sources - configuration and initialization.
+ * TODO: figure out how to stop updates from here
  */
 public class SourceManager
     implements Observer
