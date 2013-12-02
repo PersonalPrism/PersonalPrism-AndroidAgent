@@ -1,21 +1,23 @@
 package io.github.personalprism.personalprism_droid;
 
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Marker;
 import java.util.ArrayList;
-import sofia.app.Screen;
+import java.util.Observable;
+import java.util.Observer;
+
+import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import java.util.Observable;
-import java.util.Observer;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 // -------------------------------------------------------------------------
 /**
@@ -25,7 +27,7 @@ import java.util.Observer;
  * @version 2013.11.15
  */
 public class MapView
-    extends Screen
+    extends Activity
     implements Observer, OnMarkerClickListener
 {
     private GoogleMap      map;

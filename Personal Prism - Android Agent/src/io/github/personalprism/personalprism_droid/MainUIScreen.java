@@ -1,7 +1,7 @@
 package io.github.personalprism.personalprism_droid;
 
-import sofia.app.Screen;
 import android.util.Log;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,8 +15,7 @@ import android.view.Menu;
  *  @author Stuart Harvey (stu)
  *  @version 2013.11.15
  */
-public class MainUIScreen
-    extends Screen
+public class MainUIScreen extends Activity
 {
 
     @Override
