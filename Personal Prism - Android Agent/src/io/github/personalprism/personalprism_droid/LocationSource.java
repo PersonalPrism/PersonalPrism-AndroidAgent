@@ -40,6 +40,8 @@ public class LocationSource extends Observable implements ConnectionCallbacks,
 	 * 
 	 * @param context
 	 *            the context the listener is started from.
+	 * @param listener
+	 *            optional location listener
 	 */
 	@SuppressWarnings("rawtypes")
 	public LocationSource(Context context, Class listener) {
@@ -60,7 +62,6 @@ public class LocationSource extends Observable implements ConnectionCallbacks,
 			callbackIntent = PendingIntent.getService(context, 0,
 				notificationIntent, 0);
 			}
-
 	}
 
 	/**
