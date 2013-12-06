@@ -1,32 +1,30 @@
 package io.github.personalprism.personalprism_droid;
 
+import java.util.ArrayList;
+import java.util.List;
+import android.content.ComponentName;
+import java.util.Date;
+import android.os.Bundle;
+import android.os.ResultReceiver;
 import com.db4o.ext.StoredClass;
-
 import android.app.IntentService;
-import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
-import android.widget.Toast;
-
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
-import com.db4o.ObjectSet;
 import com.db4o.ext.DatabaseClosedException;
 import com.db4o.ext.DatabaseReadOnlyException;
 import com.db4o.query.Predicate;
 import com.db4o.query.QueryComparator;
 import com.google.android.gms.location.LocationClient;
 
-import org.apache.commons.lang3.SerializationUtils;
-
 /**
  * This class manages the local DB4O database that we keep records in. It is an
  * IntentService, so it uses Intents for activation and message passing. You
  * feed it a command in an intent and, depending on the command, a PendingIntent
  * to send a return message.
- * 
+ *
  * @author Hunter Morgan <kp1108>
  * @version Dec, 1, 2013
  */
@@ -53,11 +51,13 @@ public class DbHandler extends IntentService {
 
 	/** The Constant DBHANDLER_LOCATION_QUERY_COMPARATOR. */
 	public static final String DBHANDLER_LOCATION_QUERY_COMPARATOR = "io.github.personalprism.personalprism_droid.DbHandler."
-			+ "DBHANDLER_LOCATION_QUERY_COMPARATOR";;
+			+ "DBHANDLER_LOCATION_QUERY_COMPARATOR";
+
+    private static final String DBHANDLER_QUERY_ID = null;;
 
 	/**
 	 * Instantiates a new named DbHandler.
-	 * 
+	 *
 	 * @param name
 	 *            the name
 	 */
@@ -77,15 +77,17 @@ public class DbHandler extends IntentService {
 	/**
 	 * This method parses the sent Intent to get a command and optional callback
 	 * PendingIntent, and respond to the command.
-	 * 
+	 *
 	 * @param intent
 	 *            the intent
 	 */
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		Command command = Command.NONE;
+		//this makes sure if no command, no NPE
+	    Command command = Command.NONE;
 		if (intent.getAction() != null)  command = Command.valueOf(intent.getAction());
 
+		//log
 		if (MainUIScreen.DEBUG)
 			Log.d(getClass().getSimpleName(), "handling command: " + command
 					+ ", intent: " + intent.toString());
@@ -101,7 +103,8 @@ public class DbHandler extends IntentService {
 				//this is a hack because background updates don't have a command
 				if (intent.getParcelableExtra(LocationClient.KEY_LOCATION_CHANGED) != null)
 					logLocationHelper(intent);
-				
+
+				//diag/debug stuff
 //				StringBuilder debug = new StringBuilder();
 //				debug.append("toString(): " + intent.toString() + "\n");
 //				debug.append("getAction(): " + intent.getAction() + "\n");
@@ -116,50 +119,87 @@ public class DbHandler extends IntentService {
 	/**
 	 * Search location command helper. Ok - this isn't going to be super simple.
 	 * We need to pass in a DB4O native query Predicate and optional Comparator
-	 * to run the query. You will get back an array of Locations.
-	 * 
+	 * to run the query. You will get back an array of Locations. Luckily, there
+	 * is a static method to create the intent.
+	 *
 	 * @param intent
 	 *            the intent
 	 */
 	@SuppressWarnings("unchecked")
 	// it happens
 	private void searchLocationHelper(Intent intent) {
-		// These DB4O classes aren't Parcelable, but they are Serializable
-		Predicate<Location> predicate = (Predicate<Location>) SerializationUtils
-				.deserialize(intent.getByteArrayExtra(DBHANDLER_LOCATION_QUERY));
-		QueryComparator<Location> comparator = (QueryComparator<Location>) SerializationUtils
-				.deserialize(intent
-						.getByteArrayExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR));
+		Predicate<Location> predicate = (Predicate<Location>) intent.getSerializableExtra(DBHANDLER_LOCATION_QUERY);
+		QueryComparator<Location> comparator = (QueryComparator<Location>) intent
+						.getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR);
 
-		ObjectSet<Location> results;
-		Location[] locations = null;
+		List<Location> results;
+//		Location[] locations = new Location[0];
 		// Query DB, with or without comparator
 		if (intent.getByteArrayExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR) != null)
 			results = db.query(predicate, comparator);
 		else
 			results = db.query(predicate);
 
-		// Set results array
-		results.toArray(locations);
+		// Set results arraylist
+        ArrayList<Location> locations = new ArrayList<Location>(results);
+//		results.toArray(locations);
 
-		PendingIntent callback = intent // we expect a PI stored here
+		ResultReceiver callback = intent // we expect a RR stored here
 				.getParcelableExtra(DBHANDLER_REQUEST_CALLBACK);
-		Intent response = new Intent(DBHANDLER_LOCATION_RESULTS);
-		response.putExtra(DBHANDLER_LOCATION_RESULTS, locations);
-		// TODO: wire up MapView/MainUIScreen(for code example) to receive
-		// intent reply
-		try {
-			// I don't know what param2, code, is for
-			callback.send(getApplicationContext(), 0, response);
-		} catch (CanceledException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Bundle resultData = new Bundle();
+//		resultData.putParcelableArray(DBHANDLER_LOCATION_RESULTS, locations);
+		resultData.putParcelableArrayList(DBHANDLER_LOCATION_RESULTS, locations);
+        //tag it as a result of a specific query
+		callback.send(intent.getIntExtra(DBHANDLER_QUERY_ID, 0), resultData );
+	}
+
+	/**
+	 * Location query by date maker. Generates an intent to use for DbHandler
+	 * activation and query.
+	 *
+	 * @param startDate the start date
+	 * @param endDate the end date
+	 * @param receiver (probably this)
+	 * @return the query intent
+	 */
+	public static Intent locationQueryByDateMaker(final Date startDate, final Date endDate, final ResultReceiver receiver)
+	{
+	    Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
+	    //set target explicitly
+	    intent.setComponent(new ComponentName(MainUIScreen.PKGNAME, MainUIScreen.PKGNAME + ".DbHandler"));
+	    //package receiver
+	    intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
+
+	    //create DB4O stuff
+	    Predicate<Location> predicate = new Predicate<Location>() {
+
+            @Override
+            public boolean match(Location arg0)
+            {
+                //we want to make sure it's within range
+                return arg0.getTime() > startDate.getTime()
+                    && arg0.getTime() < endDate.getTime();
+            }
+        };
+
+	    QueryComparator<Location> comparator = new QueryComparator<Location>() {
+
+            @Override
+            public int compare(Location arg0, Location arg1)
+            {
+                //and let's sort chronologically, for fun
+                return (int)( arg0.getTime() - arg1.getTime());
+            }
+        };
+        //package DB4O stuff
+	    intent.putExtra(DBHANDLER_LOCATION_QUERY, predicate);
+	    intent.putExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR, comparator);
+	    return intent;
 	}
 
 	/**
 	 * Log location command helper.
-	 * 
+	 *
 	 * @param intent
 	 *            the intent
 	 */
