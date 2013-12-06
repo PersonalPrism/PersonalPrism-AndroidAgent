@@ -1,22 +1,21 @@
 package io.github.personalprism.personalprism_droid;
 
-import java.util.List;
-import com.db4o.ext.StoredClass;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
-import android.widget.Toast;
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.ext.DatabaseClosedException;
 import com.db4o.ext.DatabaseReadOnlyException;
+import com.db4o.ext.StoredClass;
 import com.db4o.query.Predicate;
 import com.db4o.query.QueryComparator;
 import com.google.android.gms.location.LocationClient;
+import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 
 /**
@@ -62,6 +61,16 @@ public class DbHandler
                                                                        "io.github.personalprism.personalprism_droid.DbHandler."
                                                                            + "DBHANDLER_LOCATION_QUERY_COMPARATOR";
 
+    private ObjectContainer    db;                                                                                 // DB4O
+// db handle
+
+
+    /** Instantiates a new DbHandler. */
+    public DbHandler() // or here.
+    {
+        super("DbHandler");
+    }
+
 
     /**
      * Instantiates a new named DbHandler.
@@ -75,13 +84,79 @@ public class DbHandler
     }
 
 
-    /** Instantiates a new DbHandler. */
-    public DbHandler() // or here.
+    /**
+     * Log location command helper.
+     * 
+     * @param intent
+     *            the intent
+     */
+    private void logLocationHelper(Intent intent)
     {
-        super("DbHandler");
+        Location location =
+            intent.getParcelableExtra(LocationClient.KEY_LOCATION_CHANGED);
+        if (MainUIScreen.DEBUG)
+        {
+            Log.d(getClass().getSimpleName(), "logging " + location);
+        }
+        try
+        {
+            db.store(location);
+        }
+        catch (DatabaseClosedException e)
+        {
+            if (MainUIScreen.DEBUG)
+            {
+                Log.e(
+                    getClass().getSimpleName(),
+                    "db exception in onHandleIntent",
+                    e);
+            }
+        }
+        catch (DatabaseReadOnlyException e)
+        {
+            if (MainUIScreen.DEBUG)
+            {
+                Log.e(
+                    getClass().getSimpleName(),
+                    "db exception in onHandleIntent",
+                    e);
+            }
+        }
     }
 
-    private ObjectContainer db; // DB4O db handle
+
+    // ----------------------------------------------------------
+    @Override
+    public void onCreate()
+    {
+        super.onCreate();
+        if (MainUIScreen.DEBUG)
+        {
+            Log.d(getClass().getSimpleName(), "try db open");
+        }
+        db =
+            Db4oEmbedded.openFile(
+                Db4oEmbedded.newConfiguration(),
+                MainUIScreen.DB4OFILENAME);
+        if (MainUIScreen.DEBUG)
+        {
+            Log.d(getClass().getSimpleName(), "db open, " + db.toString());
+        }
+    }
+
+
+    // ----------------------------------------------------------
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (MainUIScreen.DEBUG)
+        {
+            Log.d(getClass().getSimpleName(), "db close with " + records(db)
+                + " records");
+        }
+        db.close();
+    }
 
 
     /**
@@ -96,11 +171,15 @@ public class DbHandler
     {
         Command command = Command.NONE;
         if (intent.getAction() != null)
+        {
             command = Command.valueOf(intent.getAction());
+        }
 
         if (MainUIScreen.DEBUG)
+        {
             Log.d(getClass().getSimpleName(), "handling command: " + command
                 + ", intent: " + intent.toString());
+        }
 
         switch (command)
         {
@@ -115,7 +194,9 @@ public class DbHandler
 // command
                 if (intent
                     .getParcelableExtra(LocationClient.KEY_LOCATION_CHANGED) != null)
+                {
                     logLocationHelper(intent);
+                }
 
 // StringBuilder debug = new StringBuilder();
 // debug.append("toString(): " + intent.toString() + "\n");
@@ -155,16 +236,20 @@ public class DbHandler
         Location[] locations = null;
         // Query DB, with or without comparator
         if (intent.getByteArrayExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR) != null)
+        {
             results = db.query(predicate, comparator);
+        }
         else
+        {
             results = db.query(predicate);
+        }
 
         // Set results array
         results.toArray(locations);
 
         // we expect a PI stored here
-        PendingIntent callback = intent 
-            .getParcelableExtra(DBHANDLER_REQUEST_CALLBACK);
+        PendingIntent callback =
+            intent.getParcelableExtra(DBHANDLER_REQUEST_CALLBACK);
         Intent response = new Intent(DBHANDLER_LOCATION_RESULTS);
         response.putExtra(DBHANDLER_LOCATION_RESULTS, locations);
         // TODO: wire up MapView/MainUIScreen(for code example) to receive
@@ -183,65 +268,17 @@ public class DbHandler
 
 
     /**
-     * Log location command helper.
+     * Attempt at retrieving a list of locations.
      * 
-     * @param intent
-     *            the intent
+     * @return an object set of locations.
      */
-    private void logLocationHelper(Intent intent)
+    public static List<Location> getLocationList()
     {
-        Location location =
-            intent.getParcelableExtra(LocationClient.KEY_LOCATION_CHANGED);
-        if (MainUIScreen.DEBUG)
-            Log.d(getClass().getSimpleName(), "logging " + location);
-        try
-        {
-            db.store(location);
-        }
-        catch (DatabaseClosedException e)
-        {
-            if (MainUIScreen.DEBUG)
-                Log.e(
-                    getClass().getSimpleName(),
-                    "db exception in onHandleIntent",
-                    e);
-        }
-        catch (DatabaseReadOnlyException e)
-        {
-            if (MainUIScreen.DEBUG)
-                Log.e(
-                    getClass().getSimpleName(),
-                    "db exception in onHandleIntent",
-                    e);
-        }
-    }
-
-
-    // ----------------------------------------------------------
-    @Override
-    public void onCreate()
-    {
-        super.onCreate();
-        if (MainUIScreen.DEBUG)
-            Log.d(getClass().getSimpleName(), "try db open");
-        db =
+        ObjectContainer tempDB =
             Db4oEmbedded.openFile(
                 Db4oEmbedded.newConfiguration(),
                 MainUIScreen.DB4OFILENAME);
-        if (MainUIScreen.DEBUG)
-            Log.d(getClass().getSimpleName(), "db open, " + db.toString());
-    }
-
-
-    // ----------------------------------------------------------
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        if (MainUIScreen.DEBUG)
-            Log.d(getClass().getSimpleName(), "db close with " + records(db)
-                + " records");
-        db.close();
+        return tempDB.query(Location.class);
     }
 
 
@@ -256,26 +293,16 @@ public class DbHandler
     {
         int records = 0;
         for (StoredClass storedClass : db.ext().storedClasses())
+        {
             // Filter out db4o internal objects
             // and filter out object which have a parent-class, because these
             // are in the count of the parent
             if (!storedClass.getName().startsWith("com.db4o")
                 && null == storedClass.getParentStoredClass())
+            {
                 records += storedClass.instanceCount();
+            }
+        }
         return records;
-    }
-
-    
-    /**
-     * Attempt at retrieving a list of locations.
-     * @return an object set of locations.
-     */
-    public static List<Location> getLocationList()
-    {
-        ObjectContainer tempDB =
-            Db4oEmbedded.openFile(
-                Db4oEmbedded.newConfiguration(),
-                MainUIScreen.DB4OFILENAME);
-        return tempDB.query(Location.class);
     }
 }
