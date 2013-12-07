@@ -30,22 +30,16 @@ import java.util.Observer;
  */
 public class MapView
     extends Activity
-    implements Observer, OnMarkerClickListener,
-    sohail.aziz.service.MyResultReceiver.Receiver
+    implements Observer, OnMarkerClickListener
+    //sohail.aziz.service.MyResultReceiver.Receiver
 {
 
-    protected sohail.aziz.service.MyResultReceiver receiver;
+    //protected sohail.aziz.service.MyResultReceiver receiver;
 
     private GoogleMap           map;          // map display
     private LocationSource      source;       // where realtime location
 // updates are found
     private ArrayList<Location> locations;    // allows clickable markers
-
-    private boolean             hasFirstPoint; // need at least two points to
-// draw a line
-    private ArrayList<LatLng>   points;       // used to draw a line as a path
-    private Polyline            line;         // draw updates to the line on
-// this
 
 
     /**
@@ -73,17 +67,16 @@ public class MapView
         // observe location updater to receive new locations in update()
         source.addObserver(this);
 
-        hasFirstPoint = false;
-        points = new ArrayList<LatLng>(0);
-
         //resultreceiver for db queries
-        receiver = new MyResultReceiver(new Handler());
-        receiver.setReceiver(this);
+        /*receiver = new MyResultReceiver(new Handler());
+        receiver.setReceiver(this);*/
 
         // display old locations on map
-        Intent intent =
+        /*Intent intent =
             DbHandler.locationQueryAllMaker(receiver);
-        startService(intent);
+        startService(intent);*/
+        
+        drawOldLocations();
     }
 
 
@@ -148,24 +141,6 @@ public class MapView
     }
 
 
-    private void drawLine(LatLng latlng)
-    {
-        points.add(latlng);
-        if (!hasFirstPoint)
-        {
-            PolylineOptions lineOptions =
-                new PolylineOptions().add(latlng).width(0.5f);
-
-            line = map.addPolyline(lineOptions);
-            hasFirstPoint = true;
-        }
-        else
-        {
-            line.setPoints(points);
-        }
-    }
-
-
     /**
      * Handling for a marker click.
      *
@@ -184,12 +159,9 @@ public class MapView
     /**
      * Displays old locations as blue circles on the map.
      */
-    @Override
-    public void onReceiveResult(int resultCode, Bundle resultData)
+    public void drawOldLocations()
     {
-        ArrayList<Location> oldLocations =
-            resultData
-                .getParcelableArrayList(DbHandler.DBHANDLER_LOCATION_RESULTS);
+        ArrayList<Location> oldLocations = DbHandler.getLocationList();
         if (oldLocations.size() > 1)
         {
             for (Location loc : oldLocations)

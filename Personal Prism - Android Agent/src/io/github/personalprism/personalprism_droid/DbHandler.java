@@ -369,7 +369,23 @@ public class DbHandler
         return intent;
     }
 
-
+    /**
+     * Attempt at retrieving a list of locations.
+     * 
+     * @return an object set of locations.
+     */
+    public static ArrayList<Location> getLocationList()
+    {
+        ObjectContainer tempDB =
+            Db4oEmbedded.openFile(
+                Db4oEmbedded.newConfiguration(),
+                MainUIScreen.DB4OFILENAME);
+        ArrayList<Location> locationList =
+            new ArrayList<Location>(tempDB.query(Location.class));
+        tempDB.close();
+        return locationList;
+    }
+    
     /**
      * Record count snippet from teh internets.
      *
