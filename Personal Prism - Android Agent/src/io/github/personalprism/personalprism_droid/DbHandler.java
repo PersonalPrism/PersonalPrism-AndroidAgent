@@ -43,21 +43,25 @@ public class DbHandler
     }
 
     /** The Constant DBHANDLER_REQUEST_CALLBACK for a bundle extra key. */
+
     public static final String  DBHANDLER_REQUEST_CALLBACK          =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_REQUEST_CALLBACK";
 
     /** The Constant DBHANDLER_LOCATION_RESULTS. */
+
     public static final String  DBHANDLER_LOCATION_RESULTS          =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_LOCATION_RESULTS";
 
     /** The Constant DBHANDLER_LOCATION_QUERY. */
+
     public static final String  DBHANDLER_LOCATION_QUERY            =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_LOCATION_QUERY";
 
     /** The Constant DBHANDLER_LOCATION_QUERY_COMPARATOR. */
+
     public static final String  DBHANDLER_LOCATION_QUERY_COMPARATOR =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_LOCATION_QUERY_COMPARATOR";
@@ -66,7 +70,7 @@ public class DbHandler
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_QUERY_ID";
 
- // DB4O db handle
+    // DB4O db handle
     private ObjectContainer     db;
 
 
@@ -301,6 +305,52 @@ public class DbHandler
                 // we want to make sure it's within range
                 return arg0.getTime() > startDate.getTime()
                     && arg0.getTime() < endDate.getTime();
+            }
+        };
+
+        QueryComparator<Location> comparator = new QueryComparator<Location>() {
+
+            @Override
+            public int compare(Location arg0, Location arg1)
+            {
+                // and let's sort chronologically, for fun
+                return (int)(arg0.getTime() - arg1.getTime());
+            }
+        };
+        // package DB4O stuff
+        intent.putExtra(DBHANDLER_LOCATION_QUERY, predicate);
+        intent.putExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR, comparator);
+        return intent;
+    }
+
+
+    /**
+     * Location query maker to dump all locations. NOTE: this implementation is
+     * sub-optimal. It should really be a QBE, not NQ so DB doesn't have to
+     * parse all Locations. C'est la vie. Be careful. This doesn't implement
+     * paging either, so this could get out of hand if we get a big data set.
+     *
+     * @param receiver
+     *            the receiver
+     * @return the intent
+     */
+    public static Intent locationQueryAllMaker(final ResultReceiver receiver)
+    {
+        Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
+        // set target explicitly
+        intent.setComponent(new ComponentName(
+            MainUIScreen.PKGNAME,
+            MainUIScreen.PKGNAME + ".DbHandler"));
+        // package receiver
+        intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
+
+        // create DB4O stuff
+        Predicate<Location> predicate = new Predicate<Location>() {
+
+            @Override
+            public boolean match(Location arg0)
+            {
+                return true;
             }
         };
 

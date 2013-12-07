@@ -1,14 +1,13 @@
 package io.github.personalprism.personalprism_droid;
 
-import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
-
+import com.google.android.gms.maps.CameraUpdateFactory;
+import android.os.Handler;
+import sohail.aziz.service.MyResultReceiver;
+import android.content.Intent;
+import java.util.Date;
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
@@ -18,29 +17,40 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 // -------------------------------------------------------------------------
 /**
  * A map view for Personal Prism.
- * 
+ *
  * @author Stuart Harvey (stu)
  * @version 2013.11.15
  */
 public class MapView
     extends Activity
-    implements Observer, OnMarkerClickListener
+    implements Observer, OnMarkerClickListener,
+    sohail.aziz.service.MyResultReceiver.Receiver
 {
-    private GoogleMap      map;
-    private LocationSource source;
-    private ArrayList<Node> data;
-    
-    private boolean hasFirstPoint;
-    private ArrayList<LatLng> points;
-    private Polyline line;
+
+    protected sohail.aziz.service.MyResultReceiver receiver;
+
+    private GoogleMap           map;          // map display
+    private LocationSource      source;       // where realtime location
+// updates are found
+    private ArrayList<Location> locations;    // allows clickable markers
+
+    private boolean             hasFirstPoint; // need at least two points to
+// draw a line
+    private ArrayList<LatLng>   points;       // used to draw a line as a path
+    private Polyline            line;         // draw updates to the line on
+// this
+
 
     /**
      * Creates a google map view, adds location gatherer.
-     * 
+     *
      * @param savedInstanceState
      *            ...?
      */
@@ -55,20 +65,31 @@ public class MapView
             ((MapFragment)getFragmentManager().findFragmentById(R.id.map))
                 .getMap();
         map.setOnMarkerClickListener(this);
-        
-        data = new ArrayList<Node>(0);
 
+        locations = new ArrayList<Location>(0);
+
+        //
         source = new LocationSource(this, null);
+        // observe location updater to receive new locations in update()
         source.addObserver(this);
-        
+
         hasFirstPoint = false;
         points = new ArrayList<LatLng>(0);
+
+        //resultreceiver for db queries
+        receiver = new MyResultReceiver(new Handler());
+        receiver.setReceiver(this);
+
+        // display old locations on map
+        Intent intent =
+            DbHandler.locationQueryAllMaker(receiver);
+        startService(intent);
     }
 
 
     /**
      * Called when the location is updated.
-     * 
+     *
      * @param locationSource
      *            Observed location gatherer.
      * @param location
@@ -78,22 +99,23 @@ public class MapView
     public void update(Observable locationSource, Object location)
     {
         Location loc = (Location)location;
-        data.add(new Node(loc));
-        
+        locations.add(loc);
+
         // center camera
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc
-            .getLatitude(), loc.getLongitude()), 18));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+            new LatLng(loc.getLatitude(), loc.getLongitude()),
+            18));//maybe dynamically calculate zoom in future
 
         drawCircle(loc);
         drawMarker(loc);
-        drawLine(new LatLng(loc.getLatitude(), loc.getLongitude()));
+//        drawLine(new LatLng(loc.getLatitude(), loc.getLongitude()));
 
     }
 
 
     /**
      * Draws a circle with opacity 15/255 at the latest location.
-     * 
+     *
      * @param lastLocation
      *            The latest location update.
      */
@@ -108,30 +130,32 @@ public class MapView
 
         map.addCircle(circOpt);
     }
-    
+
+
     private void drawMarker(Location lastLocation)
     {
         LatLng latlng =
             new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-        Node latestNode = data.get(data.size() - 1);
-        
+        Location latest = locations.get(locations.size() - 1);
+
         map.addMarker(new MarkerOptions()
             .position(latlng)
             .draggable(false)
-            .title(latestNode.getDate().toString())
-            .snippet("Latitude: " + latlng.latitude + "\nLongtidue: " + latlng.longitude)
-            .alpha(0f));
+            .title(latest.getTime() + "")
+            .snippet(
+                "Latitude: " + latlng.latitude + "\nLongtidue: "
+                    + latlng.longitude).alpha(0f));
     }
-    
+
+
     private void drawLine(LatLng latlng)
     {
         points.add(latlng);
         if (!hasFirstPoint)
         {
-            PolylineOptions lineOptions = new PolylineOptions()
-                .add(latlng)
-                .width(0.5f);
-            
+            PolylineOptions lineOptions =
+                new PolylineOptions().add(latlng).width(0.5f);
+
             line = map.addPolyline(lineOptions);
             hasFirstPoint = true;
         }
@@ -141,9 +165,12 @@ public class MapView
         }
     }
 
+
     /**
      * Handling for a marker click.
-     * @param marker the marker that has been clicked.
+     *
+     * @param marker
+     *            the marker that has been clicked.
      * @return true if using custom behavior, else false.
      */
     @Override
@@ -151,5 +178,35 @@ public class MapView
     {
         marker.showInfoWindow();
         return true;
+    }
+
+
+    /**
+     * Displays old locations as blue circles on the map.
+     */
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData)
+    {
+        ArrayList<Location> oldLocations =
+            resultData
+                .getParcelableArrayList(DbHandler.DBHANDLER_LOCATION_RESULTS);
+        if (oldLocations.size() > 1)
+        {
+            for (Location loc : oldLocations)
+            {
+                // drawCircle(loc);
+                CircleOptions circOpt =
+                    new CircleOptions()
+                        .center(
+                            new LatLng(loc.getLatitude(), loc.getLongitude()))
+                        .fillColor(0x15FF0000).radius(5).strokeWidth(0);
+
+                map.addCircle(circOpt);
+
+                drawMarker(loc);
+                // decide if we want:
+                // drawLine(new LatLng(loc.getLatitude(), loc.getLongitude()));
+            }
+        }
     }
 }
