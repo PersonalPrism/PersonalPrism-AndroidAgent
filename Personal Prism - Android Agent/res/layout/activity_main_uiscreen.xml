@@ -40,7 +40,7 @@
 
                 <EditText
                     android:id="@+id/editCatchRate"
-                    android:layout_width="40dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:inputType="number" />
@@ -57,6 +57,7 @@
                     android:id="@+id/checkBox1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:onClick="collectDataToggle"
                     android:text="Log Data" />
             </LinearLayout>
 
@@ -70,7 +71,8 @@
                     android:id="@+id/mapButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Show Map" />
+                    android:text="Show Map"
+                    android:onClick="getMap" />
             </LinearLayout>
 
             <TextView
@@ -96,10 +98,12 @@
 
                 <EditText
                     android:id="@+id/editTimeStart"
+                    android:text="12:00"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:inputType="time"
+                    android:onClick="timeClickStart"
                     android:selectAllOnFocus="true" />
 
                 <EditText
@@ -131,7 +135,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:text="12:00"
                     android:inputType="time"
+                    android:onClick="timeClickStop"
                     android:selectAllOnFocus="true" />
 
                 <EditText
@@ -148,6 +154,7 @@
                 android:id="@+id/historyButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="getHistory"
                 android:text="Get History" />
         </LinearLayout>
     </LinearLayout>

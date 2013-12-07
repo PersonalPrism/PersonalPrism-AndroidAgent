@@ -4,14 +4,15 @@ import java.util.Calendar;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.EditText;
@@ -24,8 +25,9 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
  * MainUIScreen - Entry point for the Android Agent.
  * 
  * @author Stuart Harvey (stu)
- * @author Hunter Morgan <kp1108>
- * @version 2013.12.01
+ * @author Hunter Morgan (kp1108)
+ * @auther Michael Senoyuit (msenoyui)
+ * @version 2013.12.7
  */
 public class MainUIScreen extends Activity {
 
@@ -56,22 +58,7 @@ public class MainUIScreen extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main_uiscreen);
 
-		// text = (TextView) findViewById(R.id.text); // in case we want to
-		// output
-
 		sourceManager = new SourceManager(this);
-
-		mapButton = (Button) findViewById(R.id.mapButton);
-
-		mapButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent myIntent = new Intent(getApplicationContext(),
-						MapView.class);
-				MainUIScreen.this.startActivity(myIntent);
-			}
-		});
 	}
 
 	/*
@@ -85,14 +72,6 @@ public class MainUIScreen extends Activity {
 		getMenuInflater().inflate(R.menu.main_uiscreen, menu);
 		return true;
 	}
-
-	// /**
-	// * Create a map view.
-	// */
-	// public void mapButtonClicked() {
-	// Intent myIntent = new Intent(getApplicationContext(), MapView.class);
-	// this.startActivity(myIntent);
-	// }
 
 	/*
 	 * (non-Javadoc)
@@ -109,23 +88,26 @@ public class MainUIScreen extends Activity {
 			GooglePlayServicesUtil.getErrorDialog(available, getParent(), 0);
 	}
 
+	/**
+	 * runs when the dateStart field is clicked opens a dialog box to get the
+	 * end date then puts the data in the field
+	 * 
+	 * @param v
+	 *            dateStop field's view
+	 */
 	public void dateStartClick(View view) {
-		// TODO Auto-generated method stub
-		// To show current date in the datepicker
 		Calendar mcurrentDate = Calendar.getInstance();
 		int mYear = mcurrentDate.get(Calendar.YEAR);
 		int mMonth = mcurrentDate.get(Calendar.MONTH);
 		int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
-		final TextView text = (EditText) findViewById(R.id.editDateStart);
+		final EditText text = (EditText) findViewById(R.id.editDateStart);
 		DatePickerDialog mDatePicker;
 		mDatePicker = new DatePickerDialog(view.getContext(),
-				new DatePickerDialog.OnDateSetListener() {
+				new OnDateSetListener() {
 					public void onDateSet(DatePicker datepicker,
 							int selectedyear, int selectedmonth, int selectedday) {
-						// TODO Auto-generated method stub
-						/* Your code to get date and time */
 						selectedmonth = selectedmonth + 1;
-						text.setText("" + selectedday + "/" + selectedmonth
+						text.setText("" + selectedmonth + "/" + selectedday
 								+ "/" + selectedyear);
 					}
 				}, mYear, mMonth, mDay);
@@ -133,9 +115,14 @@ public class MainUIScreen extends Activity {
 		mDatePicker.show();
 	}
 
+	/**
+	 * runs when the dateStop field is clicked * opens a dialog box to get the
+	 * start date then puts the data in the field
+	 * 
+	 * @param v
+	 *            dateStop field's view
+	 */
 	public void dateStopClick(View view) {
-		// TODO Auto-generated method stub
-		// To show current date in the datepicker
 		Calendar mcurrentDate = Calendar.getInstance();
 		int mYear = mcurrentDate.get(Calendar.YEAR);
 		int mMonth = mcurrentDate.get(Calendar.MONTH);
@@ -146,10 +133,8 @@ public class MainUIScreen extends Activity {
 				new DatePickerDialog.OnDateSetListener() {
 					public void onDateSet(DatePicker datepicker,
 							int selectedyear, int selectedmonth, int selectedday) {
-						// TODO Auto-generated method stub
-						/* Your code to get date and time */
 						selectedmonth = selectedmonth + 1;
-						text.setText("" + selectedday + "/" + selectedmonth
+						text.setText("" + selectedmonth + "/" + selectedday
 								+ "/" + selectedyear);
 					}
 				}, mYear, mMonth, mDay);
@@ -157,98 +142,97 @@ public class MainUIScreen extends Activity {
 		mDatePicker.show();
 	}
 
-	public void onFocusChange(View v, boolean hasFocus) {
-		switch (v.getId()) {
-		case R.id.editDateStart:
-			if (hasFocus) {
-				Calendar mcurrentDate = Calendar.getInstance();
-				int mYear = mcurrentDate.get(Calendar.YEAR);
-				int mMonth = mcurrentDate.get(Calendar.MONTH);
-				int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
-				final EditText text = (EditText) findViewById(R.id.editDateStart);
-				DatePickerDialog mDatePicker;
-				mDatePicker = new DatePickerDialog(v.getContext(),
-						new DatePickerDialog.OnDateSetListener() {
-							public void onDateSet(DatePicker datepicker,
-									int selectedyear, int selectedmonth, int selectedday) {
-								// TODO Auto-generated method stub
-								/* Your code to get date and time */
-								selectedmonth = selectedmonth + 1;
-								text.setText("" + selectedday + "/" + selectedmonth
-										+ "/" + selectedyear);
-							}
-						}, mYear, mMonth, mDay);
-				mDatePicker.setTitle("Select Date");
-				mDatePicker.show();
-			}
-			break;
-		case R.id.editDateStop:
-			if (hasFocus) {
-				Calendar mcurrentDate = Calendar.getInstance();
-				int mYear = mcurrentDate.get(Calendar.YEAR);
-				int mMonth = mcurrentDate.get(Calendar.MONTH);
-				int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
-				final EditText text = (EditText) findViewById(R.id.editDateStop);
-				DatePickerDialog mDatePicker;
-				mDatePicker = new DatePickerDialog(v.getContext(),
-						new DatePickerDialog.OnDateSetListener() {
-							public void onDateSet(DatePicker datepicker,
-									int selectedyear, int selectedmonth, int selectedday) {
-								// TODO Auto-generated method stub
-								/* Your code to get date and time */
-								selectedmonth = selectedmonth + 1;
-								text.setText("" + selectedmonth + "/" + selectedday
-										+ "/" + selectedyear);
-							}
-						}, mYear, mMonth, mDay);
-				mDatePicker.setTitle("Select Date");
-				mDatePicker.show();
-			}
-			break;
-			
-		case R.id.editTimeStart:
-			if (hasFocus) {
-			 Calendar mcurrentTime = Calendar.getInstance();
-	            int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-	            int minute = mcurrentTime.get(Calendar.MINUTE);
-	            final EditText text = (EditText) findViewById(R.id.editTimeStart);
-	            TimePickerDialog mTimePicker;
-	            mTimePicker = new TimePickerDialog(v.getContext(), new TimePickerDialog.OnTimeSetListener() {
-	               
-	                public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-	                    text.setText("" + selectedHour + ":" + selectedMinute);
-	                }
+	/**
+	 * runs when the timeStart field is clicked * opens a dialog box to get the
+	 * start time then puts the data in the field
+	 * 
+	 * @param v
+	 *            timeStart field's view
+	 */
+	public void timeClickStart(View v) {
+		Calendar mcurrentTime = Calendar.getInstance();
+		int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+		int minute = mcurrentTime.get(Calendar.MINUTE);
+		final EditText text = (EditText) findViewById(R.id.editTimeStart);
+		TimePickerDialog mTimePicker;
+		mTimePicker = new TimePickerDialog(v.getContext(),
+				new TimePickerDialog.OnTimeSetListener() {
+					@Override
+					public void onTimeSet(TimePicker timePicker,
+							int selectedHour, int selectedMinute) {
+						text.setText("" + selectedHour + ":" + selectedMinute);
+					}
+				}, hour, minute, false);
+		mTimePicker.setTitle("Select Time");
+		mTimePicker.show();
 
-					
-	            }, hour, minute, true);//Yes 24 hour time
-	            mTimePicker.setTitle("Select Time");
-	            mTimePicker.show();
-			}
-			break;
-			
-		case R.id.editTimeStop:
-			//if (hasFocus) {
-			 Calendar mcurrentTime = Calendar.getInstance();
-	            int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-	            int minute = mcurrentTime.get(Calendar.MINUTE);
-	            final EditText text = (EditText) findViewById(R.id.editTimeStart);
-	            TimePickerDialog mTimePicker;
-	            mTimePicker = new TimePickerDialog(v.getContext(), new TimePickerDialog.OnTimeSetListener() {
-	               
-	                public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-	                    text.setText("" + selectedHour + ":" + selectedMinute);
-	                }
+	}
 
-					
-	            }, hour, minute, true);//Yes 24 hour time
-	            mTimePicker.setTitle("Select Time");
-	            mTimePicker.show();
-			//}
+	/**
+	 * runs when the timeStop field is clicked * opens a dialog box to get the
+	 * end time then puts the data in the field
+	 * 
+	 * @param v
+	 *            timeStop field's view
+	 */
+	public void timeClickStop(View v) {
+		Calendar mcurrentTime = Calendar.getInstance();
+		int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+		int minute = mcurrentTime.get(Calendar.MINUTE);
+		final EditText text = (EditText) findViewById(R.id.editTimeStop);
+		TimePickerDialog mTimePicker;
+		mTimePicker = new TimePickerDialog(v.getContext(),
+				new TimePickerDialog.OnTimeSetListener() {
+					@Override
+					public void onTimeSet(TimePicker timePicker,
+							int selectedHour, int selectedMinute) {
+						text.setText("" + selectedHour + ":" + selectedMinute);
+					}
+				}, hour, minute, false);
+		mTimePicker.setTitle("Select Time");
+		mTimePicker.show();
+	}
 
-		default:
-			break;
+	/**
+	 * method called when the 'show map' button is pressed
+	 * 
+	 * @param v
+	 *            the view of the button that was pressed
+	 * 
+	 */
+	public void getMap(View v) {
+		Intent myIntent = new Intent(getApplicationContext(), MapView.class);
+		MainUIScreen.this.startActivity(myIntent);
+	}
+
+	/**
+	 * method called when the 'get history' button is pressed
+	 * 
+	 * @param v
+	 *            the view of the button that was pressed
+	 * 
+	 */
+	public void getHistory(View v) {
+		
+		  Intent myIntent = new Intent(getApplicationContext(),
+		  AnimatedHistoricView.class);
+		  MainUIScreen.this.startActivity(myIntent);
+		 
+	}
+
+	/**
+	 * method called when the data collect check box is clicked
+	 * 
+	 * @param v
+	 *            the view of the check box
+	 */
+	public void collectDataToggle(View v) {
+		CheckBox check = (CheckBox) v;
+		if (check.isChecked()) {
+			// do start stuff here
+		} else {
+			// do stop stuff here
 		}
-
 	}
 
 }
