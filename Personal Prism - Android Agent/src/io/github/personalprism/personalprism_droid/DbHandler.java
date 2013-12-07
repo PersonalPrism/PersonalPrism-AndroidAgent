@@ -245,9 +245,8 @@ public class DbHandler
                 .getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR);
 
         List<Location> results;
-// Location[] locations = new Location[0];
         // Query DB, with or without comparator
-        if (intent.getByteArrayExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR) != null)
+        if (intent.getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR) != null)
         {
             results = db.query(predicate, comparator);
         }
