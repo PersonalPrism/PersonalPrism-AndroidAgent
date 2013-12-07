@@ -41,6 +41,7 @@ public class MainUIScreen
     /** The text. */
     TextView                                       text;
     Button                                         mapButton;
+    Button                                         historicButton;
 
     /** The source manager. */
     private SourceManager                          sourceManager;
@@ -83,6 +84,20 @@ public class MainUIScreen
             }
         });
 
+        historicButton = (Button)findViewById(R.id.historicButton);
+
+        historicButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v)
+            {
+                Intent myIntent =
+                    new Intent(getApplicationContext(), AnimatedHistoricView.class);
+                MainUIScreen.this.startActivity(myIntent);
+            }
+        });
+
+        
         receiver = new MyResultReceiver(new Handler());
         receiver.setReceiver(this);
 

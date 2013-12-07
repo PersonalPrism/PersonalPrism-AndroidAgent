@@ -124,17 +124,20 @@ public class MapView
         map.addCircle(circOpt);
     }
 
-
-    private void drawMarker(Location lastLocation)
+    /**
+     * Draws markers on the map where old location data is.
+     */
+    private void drawMarker(Location latest)
     {
         LatLng latlng =
-            new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-        Location latest = locations.get(locations.size() - 1);
-
+            new LatLng(latest.getLatitude(), latest.getLongitude());
+        
+        String titleData = new Date(latest.getTime()).toString();
+        
         map.addMarker(new MarkerOptions()
             .position(latlng)
             .draggable(false)
-            .title(latest.getTime() + "")
+            .title(titleData)
             .snippet(
                 "Latitude: " + latlng.latitude + "\nLongtidue: "
                     + latlng.longitude).alpha(0f));
@@ -159,14 +162,13 @@ public class MapView
     /**
      * Displays old locations as blue circles on the map.
      */
-    public void drawOldLocations()
+    private void drawOldLocations()
     {
         ArrayList<Location> oldLocations = DbHandler.getLocationList();
         if (oldLocations.size() > 1)
         {
             for (Location loc : oldLocations)
             {
-                // drawCircle(loc);
                 CircleOptions circOpt =
                     new CircleOptions()
                         .center(
@@ -176,8 +178,6 @@ public class MapView
                 map.addCircle(circOpt);
 
                 drawMarker(loc);
-                // decide if we want:
-                // drawLine(new LatLng(loc.getLatitude(), loc.getLongitude()));
             }
         }
     }

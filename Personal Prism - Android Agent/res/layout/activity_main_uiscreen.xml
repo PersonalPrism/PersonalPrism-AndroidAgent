@@ -29,4 +29,12 @@
         android:layout_centerHorizontal="true"
         android:text="Test Date Search!" />
 
+    <Button
+        android:id="@+id/historicButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mapButton"
+        android:layout_centerHorizontal="true"
+        android:text="Historic Map" />
+
 </RelativeLayout>
