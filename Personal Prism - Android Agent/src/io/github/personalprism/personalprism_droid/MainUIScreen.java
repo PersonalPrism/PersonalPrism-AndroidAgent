@@ -1,7 +1,5 @@
 package io.github.personalprism.personalprism_droid;
 
-import android.view.KeyEvent;
-import android.widget.TextView.OnEditorActionListener;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
@@ -11,22 +9,23 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.TimePicker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import io.github.personalprism.personalprism_droid.LocationSource.Mode;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import sohail.aziz.service.MyResultReceiver;
 
+// TODO: Auto-generated Javadoc
 /**
  * MainUIScreen - Entry point for the Android Agent.
  *
@@ -39,28 +38,40 @@ public class MainUIScreen
     extends Activity
     implements sohail.aziz.service.MyResultReceiver.Receiver
 {
+
+    /** The start time calendar . */
     Calendar                    startTime;
+
+    /** The stop time calendar. */
     Calendar                    stopTime;
 
     /** The Constant DEBUG. */
     public static final boolean DEBUG = true;
 
-
     // we'll actually skip this for the CS project. We only have 1 provider now
 // /** The source manager. */
 // private SourceManager sourceManager;
 
+    /** The location source. */
     private LocationSource      locationSource;
 
+    /** The receiver. */
     private MyResultReceiver    receiver;
 
     /** The DB4O db filename. */
     public static String        db4oFilename;
 
+    /** The sample rate. */
     private EditText            sampleRate;
 
 
-
+    // ----------------------------------------------------------
+    /**
+     * On create.
+     *
+     * @param savedInstanceState
+     *            the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -109,6 +120,14 @@ public class MainUIScreen
      * (non-Javadoc)
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
      */
+    // ----------------------------------------------------------
+    /**
+     * On create options menu.
+     *
+     * @param menu
+     *            the menu
+     * @return true, if successful
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -121,6 +140,10 @@ public class MainUIScreen
     /*
      * (non-Javadoc)
      * @see android.app.Activity#onResume()
+     */
+    // ----------------------------------------------------------
+    /**
+     * On resume.
      */
     @Override
     protected void onResume()
@@ -137,12 +160,12 @@ public class MainUIScreen
 
     /**
      * runs when the dateStart field is clicked opens a dialog box to get the
-     * end date then puts the data in the field
+     * end date then puts the data in the field.
      *
-     * @param v
-     *            dateStop field's view
+     * @param view
+     *            the view
      */
-    public void dateClick(final View view)
+    public void dateClick(View view)
     {
         Calendar mcurrentDate = Calendar.getInstance();
         int mYear = mcurrentDate.get(Calendar.YEAR);
@@ -162,7 +185,8 @@ public class MainUIScreen
                     // selectedmonth = selectedmonth + 1;
                     text.setText("" + (selectedmonth + 1) + "/" + selectedday
                         + "/" + selectedyear);
-                    setCalendar(view, selectedday, selectedmonth, selectedyear);
+                    setCalendar(text, selectedday, selectedmonth, selectedyear);
+                    timeMatchCheck(text);
                 }
             },
                 mYear,
@@ -175,7 +199,7 @@ public class MainUIScreen
 
     /**
      * runs when the dateStop field is clicked * opens a dialog box to get the
-     * start date then puts the data in the field
+     * start date then puts the data in the field.
      *
      * @param v
      *            dateStop field's view public void dateStopClick(View view) {
@@ -200,7 +224,7 @@ public class MainUIScreen
      * @param v
      *            timeStart field's view
      */
-    public void timeClick(final View v)
+    public void timeClick(View v)
     {
         Calendar mcurrentTime = Calendar.getInstance();
         int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
@@ -218,8 +242,8 @@ public class MainUIScreen
                         int selectedMinute)
                     {
                         text.setText("" + selectedHour + ":" + selectedMinute);
-                        setCalendar(v, selectedHour, selectedMinute);
-                        timeMatchCheck(v);
+                        setCalendar(text, selectedHour, selectedMinute);
+                        timeMatchCheck(text);
                     }
                 }, hour, minute, false);
         mTimePicker.setTitle("Select Time");
@@ -229,7 +253,7 @@ public class MainUIScreen
 
     /**
      * runs when the timeStop field is clicked * opens a dialog box to get the
-     * end time then puts the data in the field
+     * end time then puts the data in the field.
      *
      * @param v
      *            timeStop field's view public void timeClickStop(View v) {
@@ -239,6 +263,7 @@ public class MainUIScreen
      *            (EditText)findViewById(R.id.editTimeStop); TimePickerDialog
      *            mTimePicker; mTimePicker = new TimePickerDialog(
      *            v.getContext(), new TimePickerDialog.OnTimeSetListener() {
+     * @return the live map
      * @Override public void onTimeSet( TimePicker timePicker, int selectedHour,
      *           int selectedMinute) { text.setText("" + selectedHour + ":" +
      *           selectedMinute); } }, hour, minute, false);
@@ -259,10 +284,11 @@ public class MainUIScreen
 
 
     /**
-     * starts historic view for all data points
+     * starts historic view for all data points.
      *
      * @param v
      *            the v return the history
+     *
      */
     public void getHistory(View v)
     {
@@ -278,12 +304,15 @@ public class MainUIScreen
      *
      * @param v
      *            the view of the button that was pressed
+     *
      */
     public void getDateRange(View v)
     {
         Intent intent =
-            DbHandler.locationQueryByDateMaker(new Date(
-                new Date().getTime() - 60000), new Date(), receiver);
+            DbHandler.locationQueryByDateMaker(
+                startTime.getTime(),
+                stopTime.getTime(),
+                receiver);
         startService(intent);
     }
 
@@ -316,7 +345,7 @@ public class MainUIScreen
 
 
     /**
-     * method called when the data collect check box is clicked
+     * method called when the data collect check box is clicked.
      *
      * @param v
      *            the view of the check box
@@ -339,9 +368,21 @@ public class MainUIScreen
     }
 
 
-    private void setCalendar(View view, int day, int month, int year)
+    /**
+     * Sets the calendar.
+     *
+     * @param view
+     *            the view
+     * @param day
+     *            the day
+     * @param month
+     *            the month
+     * @param year
+     *            the year
+     */
+    private void setCalendar(TextView view, int day, int month, int year)
     {
-        if (view == findViewById(R.id.editDateStart))
+        if (view == (TextView)findViewById(R.id.editDateStart))
         {
             startTime.set(year, month, day);
         }
@@ -352,9 +393,19 @@ public class MainUIScreen
     }
 
 
+    /**
+     * Sets the calendar.
+     *
+     * @param view
+     *            the view
+     * @param hour
+     *            the hour
+     * @param min
+     *            the min
+     */
     private void setCalendar(View view, int hour, int min)
     {
-        if (view == findViewById(R.id.editDateStart))
+        if (view == (TextView)findViewById(R.id.editDateStart))
         {
             startTime.set(Calendar.HOUR, hour);
             startTime.set(Calendar.MINUTE, min);
@@ -367,7 +418,13 @@ public class MainUIScreen
     }
 
 
-    private void timeMatchCheck(View view)
+    /**
+     * Time match check.
+     *
+     * @param view
+     *            the view
+     */
+    private void timeMatchCheck(TextView view)
     {
         TextView editDateStop = (TextView)findViewById(R.id.editDateStop);
         TextView editDateStart = (TextView)findViewById(R.id.editDateStart);
@@ -375,8 +432,7 @@ public class MainUIScreen
         TextView editTimeStart = (TextView)findViewById(R.id.editTimeStart);
         if (startTime.after(stopTime))
         {
-            if (view == findViewById(R.id.editDateStart)
-                || view == findViewById(R.id.editTimeStart))
+            if (view == editDateStart || view == editTimeStart)
             {
                 stopTime = (Calendar)startTime.clone();
 
@@ -390,7 +446,6 @@ public class MainUIScreen
                 editDateStart.setText(editDateStop.getText());
                 editTimeStart.setText(editTimeStop.getText());
             }
-
 
         }
     }

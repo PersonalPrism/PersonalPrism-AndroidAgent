@@ -109,6 +109,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:onClick="timeClick"
+                    android:clickable="true"
                     android:text="12:00" />
 
                 <TextView
@@ -116,6 +117,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="dateClick"
+                    android:clickable="true"
                     android:text="mm/dd/yyyy" />
             </LinearLayout>
 
@@ -139,6 +141,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:onClick="timeClick"
+                    android:clickable="true"
                     android:text="12:00" />
 
                 <TextView
@@ -146,6 +149,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="dateClick"
+                    android:clickable="true"
                     android:text="mm/dd/yyyy" />
             </LinearLayout>
 
