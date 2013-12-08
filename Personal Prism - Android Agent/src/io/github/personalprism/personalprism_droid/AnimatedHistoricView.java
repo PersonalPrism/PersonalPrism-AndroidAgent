@@ -58,6 +58,9 @@ public class AnimatedHistoricView
         // disallow buttons from being used initially
 
         map.getUiSettings().setZoomControlsEnabled(false);
+        
+        LatLng position = new LatLng(37.2281706, -80.4139393); // drillfield
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
     }
 
 

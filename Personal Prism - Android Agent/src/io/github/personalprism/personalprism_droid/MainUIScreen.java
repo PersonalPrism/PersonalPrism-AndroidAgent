@@ -61,8 +61,8 @@ public class MainUIScreen
 
     private EditText sampleRate;
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates 
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
     @Override

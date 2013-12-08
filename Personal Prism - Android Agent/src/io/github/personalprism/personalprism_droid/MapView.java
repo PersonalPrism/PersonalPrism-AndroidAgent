@@ -79,7 +79,8 @@ public class MapView
             DbHandler.locationQueryAllMaker(receiver);
         startService(intent);
 
-//        drawOldLocations();
+        LatLng position = new LatLng(37.2281706, -80.4139393);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
     }
 
 
