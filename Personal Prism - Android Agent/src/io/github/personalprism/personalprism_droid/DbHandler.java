@@ -70,6 +70,8 @@ public class DbHandler
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_QUERY_ID";
 
+    private static final String PKGNAME = DbHandler.class.getPackage().getName();
+
     // DB4O db handle
     private ObjectContainer     db;
 
@@ -280,8 +282,8 @@ public class DbHandler
         Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
         // set target explicitly
         intent.setComponent(new ComponentName(
-            MainUIScreen.PKGNAME,
-            MainUIScreen.PKGNAME + ".DbHandler"));
+            PKGNAME,
+            PKGNAME + ".DbHandler"));
         // package receiver
         intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
 
@@ -328,8 +330,8 @@ public class DbHandler
         Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
         // set target explicitly
         intent.setComponent(new ComponentName(
-            MainUIScreen.PKGNAME,
-            MainUIScreen.PKGNAME + ".DbHandler"));
+            PKGNAME,
+            PKGNAME + ".DbHandler"));
         // package receiver
         intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
 
