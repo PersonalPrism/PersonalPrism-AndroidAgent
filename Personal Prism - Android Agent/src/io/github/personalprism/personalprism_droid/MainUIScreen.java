@@ -39,14 +39,12 @@ public class MainUIScreen
     extends Activity
     implements sohail.aziz.service.MyResultReceiver.Receiver
 {
+    Calendar                    startTime;
+    Calendar                    stopTime;
 
     /** The Constant DEBUG. */
     public static final boolean DEBUG = true;
 
-    /** The text. */
-
-    private TextView                    text;
-    private Button                      mapButton;
 
     // we'll actually skip this for the CS project. We only have 1 provider now
 // /** The source manager. */
@@ -57,22 +55,25 @@ public class MainUIScreen
     private MyResultReceiver    receiver;
 
     /** The DB4O db filename. */
-    public static String        DB4OFILENAME;
+    public static String        db4oFilename;
 
-    private EditText sampleRate;
+    private EditText            sampleRate;
 
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onCreate(android.os.Bundle)
-     */
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        DB4OFILENAME =
+        startTime = Calendar.getInstance();
+        stopTime = Calendar.getInstance();
+
+        db4oFilename =
             getApplicationContext().getDir("prism_db4o", 0)
                 + "/PersonalPrism.db4o";
+
         if (MainUIScreen.DEBUG)
             Log.d(getClass().getSimpleName(), "starting main activity");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_uiscreen);
 
@@ -82,16 +83,21 @@ public class MainUIScreen
         locationSource = new LocationSource(this, Mode.BACKGROUND);
 
         sampleRate = (EditText)findViewById(R.id.editCatchRate);
-        sampleRate.setText(String.valueOf(locationSource.getUpdateNominalInterval()/1000));
+        sampleRate.setText(String.valueOf(locationSource
+            .getUpdateNominalInterval() / 1000));
         sampleRate.setOnEditorActionListener(new OnEditorActionListener() {
 
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+            public boolean onEditorAction(
+                TextView v,
+                int actionId,
+                KeyEvent event)
             {
                 int interval = Integer.parseInt(v.getText().toString()) * 1000;
                 if (interval > locationSource.getUpdateFastestInterval())
-                locationSource.setUpdateNominalInterval(interval);
-                if (locationSource.isEnabled()) locationSource.restart();
+                    locationSource.setUpdateNominalInterval(interval);
+                if (locationSource.isEnabled())
+                    locationSource.restart();
                 return true;
             }
         });
@@ -136,13 +142,13 @@ public class MainUIScreen
      * @param v
      *            dateStop field's view
      */
-    public void dateStartClick(View view)
+    public void dateClick(final View view)
     {
         Calendar mcurrentDate = Calendar.getInstance();
         int mYear = mcurrentDate.get(Calendar.YEAR);
         int mMonth = mcurrentDate.get(Calendar.MONTH);
         int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
-        final EditText text = (EditText)findViewById(R.id.editDateStart);
+        final TextView text = (TextView)view;
         DatePickerDialog mDatePicker;
         mDatePicker =
             new DatePickerDialog(view.getContext(), new OnDateSetListener() {
@@ -152,11 +158,16 @@ public class MainUIScreen
                     int selectedmonth,
                     int selectedday)
                 {
-                    selectedmonth = selectedmonth + 1;
-                    text.setText("" + selectedmonth + "/" + selectedday + "/"
-                        + selectedyear);
+
+                    // selectedmonth = selectedmonth + 1;
+                    text.setText("" + (selectedmonth + 1) + "/" + selectedday
+                        + "/" + selectedyear);
+                    setCalendar(view, selectedday, selectedmonth, selectedyear);
                 }
-            }, mYear, mMonth, mDay);
+            },
+                mYear,
+                mMonth,
+                mDay);
         mDatePicker.setTitle("Select Date");
         mDatePicker.show();
     }
@@ -167,36 +178,21 @@ public class MainUIScreen
      * start date then puts the data in the field
      *
      * @param v
-     *            dateStop field's view
+     *            dateStop field's view public void dateStopClick(View view) {
+     *            Calendar mcurrentDate = Calendar.getInstance(); int mYear =
+     *            mcurrentDate.get(Calendar.YEAR); int mMonth =
+     *            mcurrentDate.get(Calendar.MONTH); int mDay =
+     *            mcurrentDate.get(Calendar.DAY_OF_MONTH); final EditText text =
+     *            (EditText)findViewById(R.id.editDateStop); DatePickerDialog
+     *            mDatePicker; mDatePicker = new DatePickerDialog(
+     *            view.getContext(), new DatePickerDialog.OnDateSetListener() {
+     *            public void onDateSet( DatePicker datepicker, int
+     *            selectedyear, int selectedmonth, int selectedday) {
+     *            selectedmonth = selectedmonth + 1; text.setText("" +
+     *            selectedmonth + "/" + selectedday + "/" + selectedyear); } },
+     *            mYear, mMonth, mDay); mDatePicker.setTitle("Select Date");
+     *            mDatePicker.show(); }
      */
-    public void dateStopClick(View view)
-    {
-        Calendar mcurrentDate = Calendar.getInstance();
-        int mYear = mcurrentDate.get(Calendar.YEAR);
-        int mMonth = mcurrentDate.get(Calendar.MONTH);
-        int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
-        final EditText text = (EditText)findViewById(R.id.editDateStop);
-        DatePickerDialog mDatePicker;
-        mDatePicker =
-            new DatePickerDialog(
-                view.getContext(),
-                new DatePickerDialog.OnDateSetListener() {
-                    public void onDateSet(
-                        DatePicker datepicker,
-                        int selectedyear,
-                        int selectedmonth,
-                        int selectedday)
-                    {
-                        selectedmonth = selectedmonth + 1;
-                        text.setText("" + selectedmonth + "/" + selectedday
-                            + "/" + selectedyear);
-                    }
-                }, mYear, mMonth, mDay);
-        mDatePicker.setTitle("Select Date");
-        mDatePicker.show();
-    }
-
-
     /**
      * runs when the timeStart field is clicked * opens a dialog box to get the
      * start time then puts the data in the field
@@ -204,12 +200,12 @@ public class MainUIScreen
      * @param v
      *            timeStart field's view
      */
-    public void timeClickStart(View v)
+    public void timeClick(final View v)
     {
         Calendar mcurrentTime = Calendar.getInstance();
         int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
         int minute = mcurrentTime.get(Calendar.MINUTE);
-        final EditText text = (EditText)findViewById(R.id.editTimeStart);
+        final TextView text = (TextView)v;
         TimePickerDialog mTimePicker;
         mTimePicker =
             new TimePickerDialog(
@@ -222,11 +218,12 @@ public class MainUIScreen
                         int selectedMinute)
                     {
                         text.setText("" + selectedHour + ":" + selectedMinute);
+                        setCalendar(v, selectedHour, selectedMinute);
+                        timeMatchCheck(v);
                     }
                 }, hour, minute, false);
         mTimePicker.setTitle("Select Time");
         mTimePicker.show();
-
     }
 
 
@@ -235,32 +232,18 @@ public class MainUIScreen
      * end time then puts the data in the field
      *
      * @param v
-     *            timeStop field's view
+     *            timeStop field's view public void timeClickStop(View v) {
+     *            Calendar mcurrentTime = Calendar.getInstance(); int hour =
+     *            mcurrentTime.get(Calendar.HOUR_OF_DAY); int minute =
+     *            mcurrentTime.get(Calendar.MINUTE); final EditText text =
+     *            (EditText)findViewById(R.id.editTimeStop); TimePickerDialog
+     *            mTimePicker; mTimePicker = new TimePickerDialog(
+     *            v.getContext(), new TimePickerDialog.OnTimeSetListener() {
+     * @Override public void onTimeSet( TimePicker timePicker, int selectedHour,
+     *           int selectedMinute) { text.setText("" + selectedHour + ":" +
+     *           selectedMinute); } }, hour, minute, false);
+     *           mTimePicker.setTitle("Select Time"); mTimePicker.show(); }
      */
-    public void timeClickStop(View v)
-    {
-        Calendar mcurrentTime = Calendar.getInstance();
-        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-        int minute = mcurrentTime.get(Calendar.MINUTE);
-        final EditText text = (EditText)findViewById(R.id.editTimeStop);
-        TimePickerDialog mTimePicker;
-        mTimePicker =
-            new TimePickerDialog(
-                v.getContext(),
-                new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(
-                        TimePicker timePicker,
-                        int selectedHour,
-                        int selectedMinute)
-                    {
-                        text.setText("" + selectedHour + ":" + selectedMinute);
-                    }
-                }, hour, minute, false);
-        mTimePicker.setTitle("Select Time");
-        mTimePicker.show();
-    }
-
 
     /**
      * this is the listener for the live map button.
@@ -278,8 +261,8 @@ public class MainUIScreen
     /**
      * starts historic view for all data points
      *
-     * @param v the v
-     * @return the history
+     * @param v
+     *            the v return the history
      */
     public void getHistory(View v)
     {
@@ -311,8 +294,12 @@ public class MainUIScreen
      * to the historic view, so we don't need to determine where the results
      * came from, just shove them in a map.
      *
-     * @param resultCode this will be the DbHandler.DBHANDLER_QUERY_ID that went with the query, if any
-     * @param resultData this will be the arraylist in the DbHandler.DBHANDLER_LOCATION_RESULTS extra
+     * @param resultCode
+     *            this will be the DbHandler.DBHANDLER_QUERY_ID that went with
+     *            the query, if any
+     * @param resultData
+     *            this will be the arraylist in the
+     *            DbHandler.DBHANDLER_LOCATION_RESULTS extra
      */
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData)
@@ -348,6 +335,63 @@ public class MainUIScreen
             // do stop stuff here
 // sourceManager.getLocationSource().disable();
             locationSource.stop();
+        }
+    }
+
+
+    private void setCalendar(View view, int day, int month, int year)
+    {
+        if (view == findViewById(R.id.editDateStart))
+        {
+            startTime.set(year, month, day);
+        }
+        else
+        {
+            stopTime.set(year, month, day);
+        }
+    }
+
+
+    private void setCalendar(View view, int hour, int min)
+    {
+        if (view == findViewById(R.id.editDateStart))
+        {
+            startTime.set(Calendar.HOUR, hour);
+            startTime.set(Calendar.MINUTE, min);
+        }
+        else
+        {
+            stopTime.set(Calendar.HOUR, hour);
+            stopTime.set(Calendar.MINUTE, min);
+        }
+    }
+
+
+    private void timeMatchCheck(View view)
+    {
+        TextView editDateStop = (TextView)findViewById(R.id.editDateStop);
+        TextView editDateStart = (TextView)findViewById(R.id.editDateStart);
+        TextView editTimeStop = (TextView)findViewById(R.id.editTimeStop);
+        TextView editTimeStart = (TextView)findViewById(R.id.editTimeStart);
+        if (startTime.after(stopTime))
+        {
+            if (view == findViewById(R.id.editDateStart)
+                || view == findViewById(R.id.editTimeStart))
+            {
+                stopTime = (Calendar)startTime.clone();
+
+                editDateStop.setText(editDateStart.getText());
+                editTimeStop.setText(editTimeStart.getText());
+            }
+            else
+            {
+                startTime = (Calendar)startTime.clone();
+
+                editDateStart.setText(editDateStop.getText());
+                editTimeStart.setText(editTimeStop.getText());
+            }
+
+
         }
     }
 
