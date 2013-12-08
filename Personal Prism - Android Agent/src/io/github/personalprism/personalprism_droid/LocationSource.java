@@ -1,5 +1,6 @@
 package io.github.personalprism.personalprism_droid;
 
+import android.widget.Toast;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +22,7 @@ import java.util.Observable;
  * Observer architecture, and after instantiating LocationService, call
  * locationService.addObserver(this); You will receive location updates in your
  * implemented update method.
- * 
+ *
  * @author Stuart Harvey (stu)
  * @author Hunter Morgan <kp1108>
  * @version 2013.12.01
@@ -29,48 +30,48 @@ import java.util.Observable;
 public class LocationSource
     extends Observable
     implements ConnectionCallbacks, OnConnectionFailedListener,
-    LocationListener
+    LocationListener, PrismDataSource
 {
-    private LocationRequest requester;
-    private LocationClient  client;
-    private boolean         observerRequired;
+    private   int updateFastestInterval = 10000;
+    private   int updateNominalInterval = 20 * 1000;
+    private   int updatePriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+    private LocationRequest mLocationRequest;
+    private LocationClient  mLocationClient;
     private PendingIntent   callbackIntent;
+    private Mode mMode;
+    private Context context;
+    public static final String COMPONENT_NAME = "Location";
+
+    public static enum Mode { OBSERVABLE, BACKGROUND};
 
 
-    /**
-     * Pass a context to begin location updates.
-     * 
-     * @param context
-     *            the context the listener is started from.
-     * @param listener
-     *            optional location listener
-     */
-    @SuppressWarnings("rawtypes")
-    public LocationSource(Context context, Class listener)
+
+    private void configureRequester()
     {
-        observerRequired = (listener == null);
         // create a new location requester, set priority and request interval
-        requester = LocationRequest.create();
-        requester.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        requester.setInterval(20 * 1000);
-        requester.setFastestInterval(10000);
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(updatePriority);
+        mLocationRequest.setInterval(updateNominalInterval);
+        mLocationRequest.setFastestInterval(updateFastestInterval);
+    }
 
+    public LocationSource(Context context, Mode opMode)
+    {
         // create the location client
-        client = new LocationClient(context, this, this);
-        // connect the location client
-        client.connect();
-        if (listener != null)
-        {
-            Intent notificationIntent = new Intent(context, listener);
-            callbackIntent =
-                PendingIntent.getService(context, 0, notificationIntent, 0);
-        }
+        mLocationClient = new LocationClient(context, this, this);
+    }
+
+    public void reconfigure()
+    {
+        disable();
+        configureRequester();
+        enable();
     }
 
 
     /**
-     * Called when the phone's location updates. (DO NOT CALL)
-     * 
+     * Google Play Services callback. Implementation detail. Called when the phone's location updates. (DO NOT CALL)
+     *
      * @param location
      *            the new location data.
      */
@@ -83,61 +84,91 @@ public class LocationSource
 
 
     /**
-     * If the connection to google maps fails, handle it appropriately. (DO NOT
+     * Google Play Services callback. Implementation detail. If the connection to google maps fails, handle it appropriately. (DO NOT
      * CALL)
-     * 
+     *
      * @param result
      *            the result of the failed connection.
      */
     @Override
     public void onConnectionFailed(ConnectionResult result)
     {
-        // TODO Handle a failed connection
+        String message = "Could not connect to Google Play Services.";
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        Log.e(getClass().getSimpleName(), message);
+        disable();
     }
 
 
     /**
-     * Called automatically when the client successfully connects (DO NOT CALL).
-     * 
+     * Google Play Services callback. Implementation detail. Called
+     * automatically when the client successfully connects (DO NOT CALL).
+     *
      * @param connectionHint
      *            the data bundle for the connection.
      */
     @Override
     public void onConnected(Bundle connectionHint)
     {
+        String message = "Connected to Google Play Services.";
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         if (MainUIScreen.DEBUG)
         {
-            Log.d(getClass().getSimpleName(), "connected, observer "
-                + observerRequired);
+            Log.d(getClass().getSimpleName(), message);
         }
-        if (observerRequired)
+        switch (mMode)
         {
-            client.requestLocationUpdates(requester, this);
-        }
-        else
-        {
-            client.requestLocationUpdates(requester, callbackIntent);
+            case BACKGROUND:
+                Intent notificationIntent = new Intent(context, DbHandler.class);
+                callbackIntent =
+                    PendingIntent.getService(context, 0, notificationIntent, 0);
+                mLocationClient.requestLocationUpdates(mLocationRequest, callbackIntent);
+                break;
+            case OBSERVABLE:
+                mLocationClient.requestLocationUpdates(mLocationRequest, this);
+                break;
+            default:
+                break;
         }
     }
 
 
     /**
-     * What to do when the location client disconnects (DO NOT CALL).
+     * Google Play Services callback. Implementation detail. What to do when the location client disconnects (DO NOT CALL).
      */
     @Override
     public void onDisconnected()
     {
-        System.out.println("Location client has disconnected.");
-        client.removeLocationUpdates(this);
+        String message = "Disconnected from Google Play Services unexpectedly.";
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        Log.e(getClass().getSimpleName(), message);
+        disable();
     }
 
 
     /**
      * Stops requests to the location.
      */
-    public void stopLocationUpdates()
+    public void enable()
     {
-        client.disconnect();
+        configureRequester();
+        mLocationClient.connect();
+    }
+
+    public void disable()
+    {
+        switch (mMode)
+        {
+            case BACKGROUND:
+                mLocationClient.removeLocationUpdates(callbackIntent);
+                break;
+            case OBSERVABLE:
+                mLocationClient.removeLocationUpdates(this);
+                break;
+            default:
+                break;
+        }
+        mLocationClient.disconnect();
     }
 
 }

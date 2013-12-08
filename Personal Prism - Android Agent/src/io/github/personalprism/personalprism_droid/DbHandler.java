@@ -209,16 +209,7 @@ public class DbHandler
                     logLocationHelper(intent);
                 }
 
-                // diag/debug stuff
-// StringBuilder debug = new StringBuilder();
-// debug.append("toString(): " + intent.toString() + "\n");
-// debug.append("getAction(): " + intent.getAction() + "\n");
-// debug.append("getData(): " + intent.getData() + "\n");
-// debug.append("getExtras().keySet().toString(): " +
-// intent.getExtras().keySet().toString() + "\n");
-// debug.append("getExtras().keySet().toString(): " + intent.getExtras(). +
-// "\n");
-// Toast.makeText(this, debug, Toast.LENGTH_LONG).show();
+
                 break;
         }
     }
@@ -240,14 +231,15 @@ public class DbHandler
         Predicate<Location> predicate =
             (Predicate<Location>)intent
                 .getSerializableExtra(DBHANDLER_LOCATION_QUERY);
-        QueryComparator<Location> comparator =
-            (QueryComparator<Location>)intent
-                .getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR);
+        QueryComparator<Location> comparator;
 
         List<Location> results;
         // Query DB, with or without comparator
         if (intent.getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR) != null)
         {
+            comparator =
+                (QueryComparator<Location>)intent
+                    .getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR);
             results = db.query(predicate, comparator);
         }
         else
@@ -257,12 +249,10 @@ public class DbHandler
 
         // Set results arraylist
         ArrayList<Location> locations = new ArrayList<Location>(results);
-// results.toArray(locations);
 
         ResultReceiver callback = intent // we expect a RR stored here
             .getParcelableExtra(DBHANDLER_REQUEST_CALLBACK);
         Bundle resultData = new Bundle();
-// resultData.putParcelableArray(DBHANDLER_LOCATION_RESULTS, locations);
         resultData
             .putParcelableArrayList(DBHANDLER_LOCATION_RESULTS, locations);
         // tag it as a result of a specific query
