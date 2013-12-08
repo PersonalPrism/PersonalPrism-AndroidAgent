@@ -43,7 +43,7 @@ public class MapViewTest
     {
         map = view.getMap();
         LatLng result = map.getCameraPosition().target;
-        LatLng expected = new LatLng(37.2281706, -80.4139393);
+        LatLng expected = new LatLng(37.216667, -80.416667);
         assertEquals(expected, result);
     }
     

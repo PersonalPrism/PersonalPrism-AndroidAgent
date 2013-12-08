@@ -16,8 +16,6 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -74,8 +72,8 @@ public class MapView
             DbHandler.locationQueryAllMaker(receiver);
         startService(intent);
 
-        LatLng position = new LatLng(37.2281706, -80.4139393);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
+        LatLng position = new LatLng(37.2166679, -80.416666);
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 12));
     }
 
 
