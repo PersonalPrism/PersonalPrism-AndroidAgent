@@ -100,26 +100,22 @@
                     android:id="@+id/textStartTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Start Time"
+                    android:text="Start Time    "
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <EditText
+                <TextView
                     android:id="@+id/editTimeStart"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:inputType="time"
-                    android:onClick="timeClickStart"
-                    android:selectAllOnFocus="true"
+                    android:onClick="timeClick"
                     android:text="12:00" />
 
-                <EditText
+                <TextView
                     android:id="@+id/editDateStart"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:inputType="date"
-                    android:onClick="dateStartClick"
-                    android:selectAllOnFocus="true"
+                    android:onClick="dateClick"
                     android:text="mm/dd/yyyy" />
             </LinearLayout>
 
@@ -134,26 +130,22 @@
                     android:id="@+id/textStopTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Stop Time"
+                    android:text="Stop Time    "
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <EditText
+                <TextView
                     android:id="@+id/editTimeStop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:inputType="time"
-                    android:onClick="timeClickStop"
-                    android:selectAllOnFocus="true"
+                    android:onClick="timeClick"
                     android:text="12:00" />
 
-                <EditText
+                <TextView
                     android:id="@+id/editDateStop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:inputType="date"
-                    android:onClick="dateStopClick"
-                    android:selectAllOnFocus="true"
+                    android:onClick="dateClick"
                     android:text="mm/dd/yyyy" />
             </LinearLayout>
 

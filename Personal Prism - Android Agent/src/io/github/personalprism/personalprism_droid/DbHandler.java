@@ -148,7 +148,7 @@ public class DbHandler
         db =
             Db4oEmbedded.openFile(
                 Db4oEmbedded.newConfiguration(),
-                MainUIScreen.DB4OFILENAME);
+                MainUIScreen.db4oFilename);
         if (MainUIScreen.DEBUG)
         {
             Log.d(getClass().getSimpleName(), "db open, " + db.toString());
