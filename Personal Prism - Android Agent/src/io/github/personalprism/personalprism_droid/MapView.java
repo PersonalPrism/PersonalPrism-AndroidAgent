@@ -177,4 +177,21 @@ public class MapView
             }
         }
     }
+    
+    /**
+     * Returns a reference to the map for testing.
+     * @return the map.
+     */
+    public GoogleMap getMap()
+    {
+        return map;
+    }
+    
+    /**
+     * Disable updates for testing.
+     */
+    public void disableUpdates()
+    {
+        source.deleteObserver(this);
+    }
 }

@@ -112,7 +112,10 @@ public class AnimatedHistoricView
             return true;
         }
 
-        previous.setEnabled(true);
+        if(iterator.hasPrevious())
+        {
+            previous.setEnabled(true);
+        }
         return false;
     }
 
@@ -183,5 +186,14 @@ public class AnimatedHistoricView
     {
         marker.showInfoWindow();
         return true;
+    }
+    
+    /**
+     * Return the google map being used by this activity.
+     * @return the map.
+     */
+    public GoogleMap getMap()
+    {
+        return map;
     }
 }
