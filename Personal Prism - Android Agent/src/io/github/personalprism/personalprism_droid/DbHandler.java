@@ -25,8 +25,8 @@ import java.util.List;
  * feed it a command in an intent and, depending on the command, a PendingIntent
  * to send a return message.
  *
- * @author Hunter Morgan <kp1108>
- * @version Dec, 1, 2013
+ * @author Hunter Morgan <kp1108> <automaticgiant@gmail.com>
+ * @version Dec, 8, 2013
  */
 public class DbHandler
     extends IntentService
@@ -48,27 +48,30 @@ public class DbHandler
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_REQUEST_CALLBACK";
 
-    /** The Constant DBHANDLER_LOCATION_RESULTS. */
+    /** The Constant DBHANDLER_LOCATION_RESULTS for a bundle extra key. */
 
     public static final String  DBHANDLER_LOCATION_RESULTS          =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_LOCATION_RESULTS";
 
-    /** The Constant DBHANDLER_LOCATION_QUERY. */
+    /** The Constant DBHANDLER_LOCATION_QUERY for a bundle extra key. */
 
     public static final String  DBHANDLER_LOCATION_QUERY            =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_LOCATION_QUERY";
 
-    /** The Constant DBHANDLER_LOCATION_QUERY_COMPARATOR. */
+    /** The Constant DBHANDLER_LOCATION_QUERY_COMPARATOR for a bundle extra key. */
 
     public static final String  DBHANDLER_LOCATION_QUERY_COMPARATOR =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_LOCATION_QUERY_COMPARATOR";
 
-    private static final String DBHANDLER_QUERY_ID                  =
+    /** The Constant DBHANDLER_QUERY_ID for a bundle extra key/resultCode. */
+    public static final String DBHANDLER_QUERY_ID                  =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_QUERY_ID";
+
+    private static final String PKGNAME = DbHandler.class.getPackage().getName();
 
     // DB4O db handle
     private ObjectContainer     db;
@@ -134,7 +137,6 @@ public class DbHandler
     }
 
 
-    // ----------------------------------------------------------
     @Override
     public void onCreate()
     {
@@ -154,7 +156,7 @@ public class DbHandler
     }
 
 
-    // ----------------------------------------------------------
+
     @Override
     public void onDestroy()
     {
@@ -209,16 +211,7 @@ public class DbHandler
                     logLocationHelper(intent);
                 }
 
-                // diag/debug stuff
-// StringBuilder debug = new StringBuilder();
-// debug.append("toString(): " + intent.toString() + "\n");
-// debug.append("getAction(): " + intent.getAction() + "\n");
-// debug.append("getData(): " + intent.getData() + "\n");
-// debug.append("getExtras().keySet().toString(): " +
-// intent.getExtras().keySet().toString() + "\n");
-// debug.append("getExtras().keySet().toString(): " + intent.getExtras(). +
-// "\n");
-// Toast.makeText(this, debug, Toast.LENGTH_LONG).show();
+
                 break;
         }
     }
@@ -240,15 +233,15 @@ public class DbHandler
         Predicate<Location> predicate =
             (Predicate<Location>)intent
                 .getSerializableExtra(DBHANDLER_LOCATION_QUERY);
-        QueryComparator<Location> comparator =
-            (QueryComparator<Location>)intent
-                .getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR);
+        QueryComparator<Location> comparator;
 
         List<Location> results;
-// Location[] locations = new Location[0];
         // Query DB, with or without comparator
-        if (intent.getByteArrayExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR) != null)
+        if (intent.getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR) != null)
         {
+            comparator =
+                (QueryComparator<Location>)intent
+                    .getSerializableExtra(DBHANDLER_LOCATION_QUERY_COMPARATOR);
             results = db.query(predicate, comparator);
         }
         else
@@ -258,12 +251,10 @@ public class DbHandler
 
         // Set results arraylist
         ArrayList<Location> locations = new ArrayList<Location>(results);
-// results.toArray(locations);
 
         ResultReceiver callback = intent // we expect a RR stored here
             .getParcelableExtra(DBHANDLER_REQUEST_CALLBACK);
         Bundle resultData = new Bundle();
-// resultData.putParcelableArray(DBHANDLER_LOCATION_RESULTS, locations);
         resultData
             .putParcelableArrayList(DBHANDLER_LOCATION_RESULTS, locations);
         // tag it as a result of a specific query
@@ -291,8 +282,8 @@ public class DbHandler
         Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
         // set target explicitly
         intent.setComponent(new ComponentName(
-            MainUIScreen.PKGNAME,
-            MainUIScreen.PKGNAME + ".DbHandler"));
+            PKGNAME,
+            PKGNAME + ".DbHandler"));
         // package receiver
         intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
 
@@ -339,8 +330,8 @@ public class DbHandler
         Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
         // set target explicitly
         intent.setComponent(new ComponentName(
-            MainUIScreen.PKGNAME,
-            MainUIScreen.PKGNAME + ".DbHandler"));
+            PKGNAME,
+            PKGNAME + ".DbHandler"));
         // package receiver
         intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
 
@@ -369,23 +360,23 @@ public class DbHandler
         return intent;
     }
 
-    /**
-     * Attempt at retrieving a list of locations.
-     * 
-     * @return an object set of locations.
-     */
-    public static ArrayList<Location> getLocationList()
-    {
-        ObjectContainer tempDB =
-            Db4oEmbedded.openFile(
-                Db4oEmbedded.newConfiguration(),
-                MainUIScreen.DB4OFILENAME);
-        ArrayList<Location> locationList =
-            new ArrayList<Location>(tempDB.query(Location.class));
-        tempDB.close();
-        return locationList;
-    }
-    
+//    /**
+//     * Attempt at retrieving a list of locations.
+//     *
+//     * @return an object set of locations.
+//     */
+//    public static ArrayList<Location> getLocationList()
+//    {
+//        ObjectContainer tempDB =
+//            Db4oEmbedded.openFile(
+//                Db4oEmbedded.newConfiguration(),
+//                MainUIScreen.DB4OFILENAME);
+//        ArrayList<Location> locationList =
+//            new ArrayList<Location>(tempDB.query(Location.class));
+//        tempDB.close();
+//        return locationList;
+//    }
+
     /**
      * Record count snippet from teh internets.
      *

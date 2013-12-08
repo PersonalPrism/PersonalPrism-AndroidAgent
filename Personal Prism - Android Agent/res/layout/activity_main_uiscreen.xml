@@ -1,3 +1,8 @@
+ <!--
+ MainUIScreen layout
+ @author Michael Senoyuit (msenoyui)
+ @version 2013.12.8
+ -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,33 +13,164 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainUIScreen" >
 
-    <Button
-        android:id="@+id/mapButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="Activate Map" />
-    <TextView
-        android:id="@+id/text"
+    <LinearLayout
+        android:id="@+id/layoutMainActionItems"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_world" />
-
-    <Button
-        android:id="@+id/testDateSearch"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/mapButton"
         android:layout_centerHorizontal="true"
-        android:text="Test Date Search!" />
+        android:layout_marginTop="0dp" >
 
-    <Button
-        android:id="@+id/historicButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/mapButton"
-        android:layout_centerHorizontal="true"
-        android:text="Historic Map" />
+        <LinearLayout
+            android:id="@+id/layoutMainActivityStack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="0dp"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/catchRateLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:gravity="center" >
+
+                <TextView
+                    android:id="@+id/textCatchRate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Data Collect Rate"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/editCatchRate"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="number"
+                    android:numeric="integer" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/logCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="center" >
+
+                <CheckBox
+                    android:id="@+id/checkBox1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="collectDataToggle"
+                    android:text="Log Data" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp" >
+
+                <Button
+                    android:id="@+id/liveMapButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="getLiveMap"
+                    android:text="Show Live Map" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Get Date Range"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <LinearLayout
+                android:id="@+id/startTimeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="center" >
+
+                <TextView
+                    android:id="@+id/textStartTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start Time"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/editTimeStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="time"
+                    android:onClick="timeClickStart"
+                    android:selectAllOnFocus="true"
+                    android:text="12:00" />
+
+                <EditText
+                    android:id="@+id/editDateStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:onClick="dateStartClick"
+                    android:selectAllOnFocus="true"
+                    android:text="mm/dd/yyyy" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/stopTimeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="center" >
+
+                <TextView
+                    android:id="@+id/textStopTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stop Time"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/editTimeStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="time"
+                    android:onClick="timeClickStop"
+                    android:selectAllOnFocus="true"
+                    android:text="12:00" />
+
+                <EditText
+                    android:id="@+id/editDateStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:onClick="dateStopClick"
+                    android:selectAllOnFocus="true"
+                    android:text="mm/dd/yyyy" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/dateRangeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="getDateRange"
+                android:text="Get Date Range" />
+
+            <Button
+                android:id="@+id/historyButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="getHistory"
+                android:text="Get Full History" />
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>

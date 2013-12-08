@@ -1,5 +1,6 @@
 package io.github.personalprism.personalprism_droid;
 
+import io.github.personalprism.personalprism_droid.LocationSource.Mode;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import android.os.Handler;
 import sohail.aziz.service.MyResultReceiver;
@@ -23,18 +24,18 @@ import java.util.Observer;
 
 // -------------------------------------------------------------------------
 /**
- * A map view for Personal Prism.
+ * A live map view for Personal Prism. This listens on its own, faster than default background updates.
  *
  * @author Stuart Harvey (stu)
- * @version 2013.11.15
+ * @version 2013.12.08
  */
 public class MapView
     extends Activity
-    implements Observer, OnMarkerClickListener
-    //sohail.aziz.service.MyResultReceiver.Receiver
+    implements Observer, OnMarkerClickListener,
+    sohail.aziz.service.MyResultReceiver.Receiver
 {
 
-    //protected sohail.aziz.service.MyResultReceiver receiver;
+    private sohail.aziz.service.MyResultReceiver receiver;
 
     private GoogleMap           map;          // map display
     private LocationSource      source;       // where realtime location
@@ -63,20 +64,22 @@ public class MapView
         locations = new ArrayList<Location>(0);
 
         //
-        source = new LocationSource(this, null);
+        source = new LocationSource(this, Mode.OBSERVABLE);
+        source.setUpdateFastestInterval(5);
+        source.setUpdateNominalInterval(10);
         // observe location updater to receive new locations in update()
         source.addObserver(this);
 
         //resultreceiver for db queries
-        /*receiver = new MyResultReceiver(new Handler());
-        receiver.setReceiver(this);*/
+        receiver = new MyResultReceiver(new Handler());
+        receiver.setReceiver(this);
 
         // display old locations on map
-        /*Intent intent =
+        Intent intent =
             DbHandler.locationQueryAllMaker(receiver);
-        startService(intent);*/
-        
-        drawOldLocations();
+        startService(intent);
+
+//        drawOldLocations();
     }
 
 
@@ -131,9 +134,9 @@ public class MapView
     {
         LatLng latlng =
             new LatLng(latest.getLatitude(), latest.getLongitude());
-        
+
         String titleData = new Date(latest.getTime()).toString();
-        
+
         map.addMarker(new MarkerOptions()
             .position(latlng)
             .draggable(false)
@@ -162,10 +165,11 @@ public class MapView
     /**
      * Displays old locations as blue circles on the map.
      */
-    private void drawOldLocations()
+    public void onReceiveResult(int resultCode, Bundle resultData)
     {
-        ArrayList<Location> oldLocations = DbHandler.getLocationList();
-        if (oldLocations.size() > 1)
+//        ArrayList<Location> oldLocations = DbHandler.getLocationList();
+        ArrayList<Location> oldLocations = resultData.getParcelableArrayList(DbHandler.DBHANDLER_LOCATION_RESULTS);
+        if (oldLocations.size() > 0)
         {
             for (Location loc : oldLocations)
             {

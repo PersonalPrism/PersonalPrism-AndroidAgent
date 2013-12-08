@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -14,63 +15,98 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import java.util.Observable;
 
+// TODO: Auto-generated Javadoc
 /**
- * Handles the constant gathering of location data. Create from a service or
- * activity context by calling: new
- * LocationService(this.getApplicationContext()); Your source must implement
- * Observer architecture, and after instantiating LocationService, call
- * locationService.addObserver(this); You will receive location updates in your
- * implemented update method.
- * 
+ * This is a PrismDataSource for Google Play Services location updates. It can
+ * run in Observable mode or background update mode. Start and stop with start()
+ * and stop(). It is hard-coded to send background updates to DbHandler in
+ * background mode. As an observable, just add an observer and you're good to
+ * go. To reconfigure, just modify the settings and run restart().
+ *
  * @author Stuart Harvey (stu)
- * @author Hunter Morgan <kp1108>
- * @version 2013.12.01
+ * @author Hunter Morgan <kp1108> <automaticgiant@gmail.com>
+ * @version 2013.12.08
  */
 public class LocationSource
     extends Observable
     implements ConnectionCallbacks, OnConnectionFailedListener,
-    LocationListener
+    LocationListener, PrismDataSource
 {
-    private LocationRequest requester;
-    private LocationClient  client;
-    private boolean         observerRequired;
+    // these are default settings for the updates
+    /** The update fastest interval. */
+    private int             updateFastestInterval = 10 * 1000;
+
+    /** The update nominal interval. */
+    private int             updateNominalInterval = 60 * 1000;
+
+    /** The update priority. */
+    private int             updatePriority        =
+                                                      LocationRequest.PRIORITY_HIGH_ACCURACY;
+
+    /** The m location request. */
+    private LocationRequest mLocationRequest;
+
+    /** The m location client. */
+    private LocationClient  mLocationClient;
+
+    /** The callback intent. */
     private PendingIntent   callbackIntent;
+
+    /** The m mode. */
+    private Mode            mMode;
+
+    /** The m context. */
+    private Context         mContext;
 
 
     /**
-     * Pass a context to begin location updates.
-     * 
-     * @param context
-     *            the context the listener is started from.
-     * @param listener
-     *            optional location listener
+     * The Enum Mode.
      */
-    @SuppressWarnings("rawtypes")
-    public LocationSource(Context context, Class listener)
+    public static enum Mode
     {
-        observerRequired = (listener == null);
-        // create a new location requester, set priority and request interval
-        requester = LocationRequest.create();
-        requester.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        requester.setInterval(20 * 1000);
-        requester.setFastestInterval(10000);
 
-        // create the location client
-        client = new LocationClient(context, this, this);
-        // connect the location client
-        client.connect();
-        if (listener != null)
-        {
-            Intent notificationIntent = new Intent(context, listener);
-            callbackIntent =
-                PendingIntent.getService(context, 0, notificationIntent, 0);
-        }
+        /** The observable. */
+        OBSERVABLE,
+
+        /** The background. */
+        BACKGROUND
+    };
+
+
+    /**
+     * Configure requester.
+     */
+    private void configureRequester()
+    {
+        // create a new location requester, set priority and request interval
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(updatePriority);
+        mLocationRequest.setInterval(updateNominalInterval);
+        mLocationRequest.setFastestInterval(updateFastestInterval);
     }
 
 
     /**
-     * Called when the phone's location updates. (DO NOT CALL)
-     * 
+     * Instantiates a new location source.
+     *
+     * @param context
+     *            the context
+     * @param opMode
+     *            the op mode
+     */
+    public LocationSource(Context context, Mode opMode)
+    {
+        mMode = opMode;
+        mContext = context;
+        // create the location client
+        mLocationClient = new LocationClient(context, this, this);
+    }
+
+
+    /**
+     * Google Play Services callback. Implementation detail. Called when the
+     * phone's location updates. (DO NOT CALL)
+     *
      * @param location
      *            the new location data.
      */
@@ -83,61 +119,204 @@ public class LocationSource
 
 
     /**
-     * If the connection to google maps fails, handle it appropriately. (DO NOT
-     * CALL)
-     * 
+     * Google Play Services callback. Implementation detail. If the connection
+     * to google maps fails, handle it appropriately. (DO NOT CALL)
+     *
      * @param result
      *            the result of the failed connection.
      */
     @Override
     public void onConnectionFailed(ConnectionResult result)
     {
-        // TODO Handle a failed connection
+        String message =
+            "LocationSource could not connect to Google Play Services.";
+        Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+        Log.e(getClass().getSimpleName(), message);
+        stop();
     }
 
 
     /**
-     * Called automatically when the client successfully connects (DO NOT CALL).
-     * 
+     * Google Play Services callback. Implementation detail. Called
+     * automatically when the client successfully connects (DO NOT CALL).
+     *
      * @param connectionHint
      *            the data bundle for the connection.
      */
     @Override
     public void onConnected(Bundle connectionHint)
     {
+        String message = "Connected LocationSource to Google Play Services.";
+        Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
         if (MainUIScreen.DEBUG)
         {
-            Log.d(getClass().getSimpleName(), "connected, observer "
-                + observerRequired);
+            Log.d(getClass().getSimpleName(), message);
         }
-        if (observerRequired)
+        switch (mMode)
         {
-            client.requestLocationUpdates(requester, this);
-        }
-        else
-        {
-            client.requestLocationUpdates(requester, callbackIntent);
+            case BACKGROUND:
+                Intent notificationIntent =
+                    new Intent(mContext, DbHandler.class);
+                callbackIntent =
+                    PendingIntent
+                        .getService(mContext, 0, notificationIntent, 0);
+                mLocationClient.requestLocationUpdates(
+                    mLocationRequest,
+                    callbackIntent);
+                break;
+            case OBSERVABLE:
+                mLocationClient.requestLocationUpdates(mLocationRequest, this);
+                break;
+            default:
+                break;
         }
     }
 
 
     /**
-     * What to do when the location client disconnects (DO NOT CALL).
+     * Google Play Services callback. Implementation detail. What to do when the
+     * location client disconnects (DO NOT CALL).
      */
     @Override
     public void onDisconnected()
     {
-        System.out.println("Location client has disconnected.");
-        client.removeLocationUpdates(this);
+        String message =
+            "LocationSource disconnected from Google Play Services unexpectedly.";
+        Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+        Log.e(getClass().getSimpleName(), message);
+        stop();
+    }
+
+
+    @Override
+    public void start()
+    {
+        configureRequester();
+        mLocationClient.connect();
+    }
+
+
+    // ----------------------------------------------------------
+    @Override
+    public void stop()
+    {
+        switch (mMode)
+        {
+            case BACKGROUND:
+                mLocationClient.removeLocationUpdates(callbackIntent);
+                break;
+            case OBSERVABLE:
+                mLocationClient.removeLocationUpdates(this);
+                break;
+            default:
+                break;
+        }
+        mLocationClient.disconnect();
+        String message =
+            "Disconnected LocationSource from Google Play Services.";
+        Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+        if (MainUIScreen.DEBUG)
+        {
+            Log.d(getClass().getSimpleName(), message);
+        }
     }
 
 
     /**
-     * Stops requests to the location.
+     * Gets the update fastest interval.
+     *
+     * @return the update fastest interval
      */
-    public void stopLocationUpdates()
+    public int getUpdateFastestInterval()
     {
-        client.disconnect();
+        return updateFastestInterval;
+    }
+
+
+    /**
+     * Sets the update fastest interval.
+     *
+     * @param updateFastestInterval
+     *            the new update fastest interval
+     */
+    public void setUpdateFastestInterval(int updateFastestInterval)
+    {
+        //negative will throw exception
+        if (updateFastestInterval > 0)
+        this.updateFastestInterval = updateFastestInterval;
+    }
+
+
+    /**
+     * Gets the update nominal interval.
+     *
+     * @return the update nominal interval
+     */
+    public int getUpdateNominalInterval()
+    {
+        return updateNominalInterval;
+    }
+
+
+    /**
+     * Sets the update nominal interval.
+     *
+     * @param updateNominalInterval
+     *            the new update nominal interval
+     */
+    public void setUpdateNominalInterval(int updateNominalInterval)
+    {
+        //negative will throw exception
+        if (updateNominalInterval > 0)
+        this.updateNominalInterval = updateNominalInterval;
+    }
+
+
+    /**
+     * Gets the update priority.
+     *
+     * @return the update priority
+     */
+    public int getUpdatePriority()
+    {
+        return updatePriority;
+    }
+
+
+    /**
+     * Sets the update priority.
+     *
+     * @param updatePriority
+     *            the new update priority
+     */
+    public void setUpdatePriority(int updatePriority)
+    {
+        // these are the specced constants in LocationRequest
+        if (updatePriority == LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+            || updatePriority == LocationRequest.PRIORITY_HIGH_ACCURACY
+            || updatePriority == LocationRequest.PRIORITY_LOW_POWER
+            || updatePriority == LocationRequest.PRIORITY_NO_POWER)
+        {
+            this.updatePriority = updatePriority;
+        }
+    }
+
+
+    // ----------------------------------------------------------
+    @Override
+    public void restart()
+    {
+        if (mLocationClient.isConnected())
+            stop();
+        configureRequester();
+        start();
+    }
+
+
+    @Override
+    public boolean isEnabled()
+    {
+        return mLocationClient.isConnected() || mLocationClient.isConnecting();
     }
 
 }

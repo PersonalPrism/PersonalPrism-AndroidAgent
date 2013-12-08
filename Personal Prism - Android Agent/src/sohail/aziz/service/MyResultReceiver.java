@@ -4,6 +4,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 
+/**
+ * The Class MyResultReceiver. This was an implementation of Android
+ * ResultReceiver I stole because I couldn't grok it. It's so minimal, there's
+ * not really any rewriting it, so I take and give credit. Courtesy of:
+ * http://sohailaziz.com/2012/05/intentservice-providing-data-back-to.html
+ * @author sohail aziz
+ * @version 2012/04/22
+ */
 public class MyResultReceiver
     extends ResultReceiver
 {

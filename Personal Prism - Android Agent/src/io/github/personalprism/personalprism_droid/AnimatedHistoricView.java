@@ -21,9 +21,9 @@ import com.google.android.gms.maps.MapFragment;
 /**
  * // -------------------------------------------------------------------------
  * /** Displays an animation of the old location data.
- * 
+ *
  * @author Stuart Harvey (stu)
- * @version 2013.12.7
+ * @version 2013.12.8
  */
 public class AnimatedHistoricView
     extends Screen
@@ -51,10 +51,12 @@ public class AnimatedHistoricView
             ((MapFragment)getFragmentManager().findFragmentById(
                 R.id.historicmap)).getMap();
 
-        createLinkedLocationList(DbHandler.getLocationList());
+//        createLinkedLocationList(DbHandler.getLocationList());
+        ArrayList<Location> results = getIntent().getParcelableArrayListExtra(DbHandler.DBHANDLER_LOCATION_RESULTS);
+        createLinkedLocationList(results);
 
         // disallow buttons from being used initially
-        
+
         map.getUiSettings().setZoomControlsEnabled(false);
     }
 
@@ -93,21 +95,21 @@ public class AnimatedHistoricView
             new LatLng(nextLocation.getLatitude(), nextLocation.getLongitude());
         CameraPosition cameraPosition =
             new CameraPosition.Builder()
-                .target(target) 
+                .target(target)
                 .zoom(18)
                 .bearing(nextLocation.getBearing())
                 .tilt(55)
                 .build();
         map.animateCamera(CameraUpdateFactory
             .newCameraPosition(cameraPosition), 500, null);
-        
+
         if (!iterator.hasNext())
         {
             next.setEnabled(false);
             animate.setEnabled(false);
             return true;
         }
-        
+
         previous.setEnabled(true);
         return false;
     }
@@ -122,23 +124,23 @@ public class AnimatedHistoricView
             new LatLng(nextLocation.getLatitude(), nextLocation.getLongitude());
         CameraPosition cameraPosition =
             new CameraPosition.Builder()
-                .target(target) 
+                .target(target)
                 .zoom(18)
                 .bearing(nextLocation.getBearing())
                 .tilt(55)
                 .build();
         map.animateCamera(CameraUpdateFactory
             .newCameraPosition(cameraPosition), 500, null);
-        
+
         if (!iterator.hasPrevious())
         {
             previous.setEnabled(false);
         }
-        
+
         next.setEnabled(true);
         animate.setEnabled(true);
-    }   
-    
+    }
+
     /**
      * Iterate through all data points.
      */
@@ -146,7 +148,7 @@ public class AnimatedHistoricView
     {
         Timer.callRepeatedly(this, "nextClicked", 500);
     }
-    
+
     /**
      * Draws markers on the map where old location data is.
      */
@@ -156,7 +158,7 @@ public class AnimatedHistoricView
             new LatLng(loc.getLatitude(), loc.getLongitude());
 
         String titleData = new Date(loc.getTime()).toString();
-        
+
         map.addMarker(new MarkerOptions()
             .position(latlng)
             .draggable(false)
@@ -165,7 +167,7 @@ public class AnimatedHistoricView
                 "Latitude: " + latlng.latitude + "\nLongtidue: "
                     + latlng.longitude));
     }
-    
+
     /**
      * Handling for a marker click.
      *
@@ -179,7 +181,7 @@ public class AnimatedHistoricView
         marker.showInfoWindow();
         return true;
     }
-    
+
 /*    private class AnimateTask extends TimerTask {
 
         *//**
@@ -197,6 +199,6 @@ public class AnimatedHistoricView
                 this.cancel();
             }
         }
-        
+
     }*/
 }
