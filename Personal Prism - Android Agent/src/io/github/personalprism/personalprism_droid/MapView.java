@@ -40,8 +40,6 @@ public class MapView
     private GoogleMap           map;          // map display
     private LocationSource      source;       // where realtime location
 // updates are found
-    private ArrayList<Location> locations;    // allows clickable markers
-
 
     /**
      * Creates a google map view, adds location gatherer.
@@ -61,16 +59,13 @@ public class MapView
                 .getMap();
         map.setOnMarkerClickListener(this);
 
-        locations = new ArrayList<Location>(0);
-
-        //
         source = new LocationSource(this, Mode.OBSERVABLE);
         source.setUpdateFastestInterval(5);
         source.setUpdateNominalInterval(10);
         // observe location updater to receive new locations in update()
         source.addObserver(this);
 
-        //resultreceiver for db queries
+        //result receiver for db queries
         receiver = new MyResultReceiver(new Handler());
         receiver.setReceiver(this);
 
@@ -96,7 +91,6 @@ public class MapView
     public void update(Observable locationSource, Object location)
     {
         Location loc = (Location)location;
-        locations.add(loc);
 
         // center camera
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(
@@ -105,8 +99,6 @@ public class MapView
 
         drawCircle(loc);
         drawMarker(loc);
-//        drawLine(new LatLng(loc.getLatitude(), loc.getLongitude()));
-
     }
 
 
@@ -168,7 +160,6 @@ public class MapView
      */
     public void onReceiveResult(int resultCode, Bundle resultData)
     {
-//        ArrayList<Location> oldLocations = DbHandler.getLocationList();
         ArrayList<Location> oldLocations = resultData.getParcelableArrayList(DbHandler.DBHANDLER_LOCATION_RESULTS);
         if (oldLocations.size() > 0)
         {

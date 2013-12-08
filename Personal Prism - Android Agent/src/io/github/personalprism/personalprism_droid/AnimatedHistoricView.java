@@ -51,7 +51,6 @@ public class AnimatedHistoricView
             ((MapFragment)getFragmentManager().findFragmentById(
                 R.id.historicmap)).getMap();
 
-//        createLinkedLocationList(DbHandler.getLocationList());
         ArrayList<Location> results = getIntent().getParcelableArrayListExtra(DbHandler.DBHANDLER_LOCATION_RESULTS);
         createLinkedLocationList(results);
 
@@ -149,6 +148,7 @@ public class AnimatedHistoricView
      */
     public void animateClicked()
     {
+        // starts a sofia timer to repeatedly call nextClicked, ends w/ no next
         Timer.callRepeatedly(this, "nextClicked", 500);
     }
 
@@ -184,24 +184,4 @@ public class AnimatedHistoricView
         marker.showInfoWindow();
         return true;
     }
-
-/*    private class AnimateTask extends TimerTask {
-
-        *//**
-         * The operations to be executed each time the timer executes a task.
-         *//*
-        @Override
-        public void run()
-        {
-            if (iterator.hasNext())
-            {
-                nextClicked();
-            }
-            else
-            {
-                this.cancel();
-            }
-        }
-
-    }*/
 }
