@@ -22,7 +22,7 @@ import java.util.Observable;
  * and stop(). It is hard-coded to send background updates to DbHandler in
  * background mode. As an observable, just add an observer and you're good to
  * go. To reconfigure, just modify the settings and run restart().
- *
+ * 
  * @author Stuart Harvey (stu)
  * @author Hunter Morgan <kp1108> <automaticgiant@gmail.com>
  * @version 2013.12.08
@@ -88,7 +88,7 @@ public class LocationSource
 
     /**
      * Instantiates a new location source.
-     *
+     * 
      * @param context
      *            the context
      * @param opMode
@@ -106,7 +106,7 @@ public class LocationSource
     /**
      * Google Play Services callback. Implementation detail. Called when the
      * phone's location updates. (DO NOT CALL)
-     *
+     * 
      * @param location
      *            the new location data.
      */
@@ -121,7 +121,7 @@ public class LocationSource
     /**
      * Google Play Services callback. Implementation detail. If the connection
      * to google maps fails, handle it appropriately. (DO NOT CALL)
-     *
+     * 
      * @param result
      *            the result of the failed connection.
      */
@@ -139,7 +139,7 @@ public class LocationSource
     /**
      * Google Play Services callback. Implementation detail. Called
      * automatically when the client successfully connects (DO NOT CALL).
-     *
+     * 
      * @param connectionHint
      *            the data bundle for the connection.
      */
@@ -224,7 +224,7 @@ public class LocationSource
 
     /**
      * Gets the update fastest interval.
-     *
+     * 
      * @return the update fastest interval
      */
     public int getUpdateFastestInterval()
@@ -235,21 +235,21 @@ public class LocationSource
 
     /**
      * Sets the update fastest interval.
-     *
+     * 
      * @param updateFastestInterval
      *            the new update fastest interval
      */
     public void setUpdateFastestInterval(int updateFastestInterval)
     {
-        //negative will throw exception
+        // negative will throw exception
         if (updateFastestInterval > 0)
-        this.updateFastestInterval = updateFastestInterval;
+            this.updateFastestInterval = updateFastestInterval;
     }
 
 
     /**
      * Gets the update nominal interval.
-     *
+     * 
      * @return the update nominal interval
      */
     public int getUpdateNominalInterval()
@@ -260,21 +260,21 @@ public class LocationSource
 
     /**
      * Sets the update nominal interval.
-     *
+     * 
      * @param updateNominalInterval
      *            the new update nominal interval
      */
     public void setUpdateNominalInterval(int updateNominalInterval)
     {
-        //negative will throw exception
+        // negative will throw exception
         if (updateNominalInterval > 0)
-        this.updateNominalInterval = updateNominalInterval;
+            this.updateNominalInterval = updateNominalInterval;
     }
 
 
     /**
      * Gets the update priority.
-     *
+     * 
      * @return the update priority
      */
     public int getUpdatePriority()
@@ -285,7 +285,7 @@ public class LocationSource
 
     /**
      * Sets the update priority.
-     *
+     * 
      * @param updatePriority
      *            the new update priority
      */

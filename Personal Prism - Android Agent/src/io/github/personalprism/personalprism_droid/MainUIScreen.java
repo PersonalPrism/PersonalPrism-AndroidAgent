@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -29,7 +28,7 @@ import sohail.aziz.service.MyResultReceiver;
 
 /**
  * MainUIScreen - Entry point for the Android Agent.
- *
+ * 
  * @author Stuart Harvey (stu)
  * @author Hunter Morgan (kp1108) <automaticgiant@gmail.com>
  * @auther Michael Senoyuit (msenoyui)
@@ -39,16 +38,11 @@ public class MainUIScreen
     extends Activity
     implements sohail.aziz.service.MyResultReceiver.Receiver
 {
-    Calendar                    startTime;
-    Calendar                    stopTime;
+    private Calendar            startTime;
+    private Calendar            stopTime;
 
     /** The Constant DEBUG. */
     public static final boolean DEBUG = true;
-
-
-    // we'll actually skip this for the CS project. We only have 1 provider now
-// /** The source manager. */
-// private SourceManager sourceManager;
 
     private LocationSource      locationSource;
 
@@ -58,7 +52,6 @@ public class MainUIScreen
     public static String        db4oFilename;
 
     private EditText            sampleRate;
-
 
 
     @Override
@@ -101,12 +94,12 @@ public class MainUIScreen
                 return true;
             }
         });
-// sourceManager = new SourceManager(this);
     }
 
 
-    /*
+    /**
      * (non-Javadoc)
+     * 
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
      */
     @Override
@@ -118,8 +111,9 @@ public class MainUIScreen
     }
 
 
-    /*
+    /**
      * (non-Javadoc)
+     * 
      * @see android.app.Activity#onResume()
      */
     @Override
@@ -138,8 +132,8 @@ public class MainUIScreen
     /**
      * runs when the dateStart field is clicked opens a dialog box to get the
      * end date then puts the data in the field
-     *
-     * @param v
+     * 
+     * @param view
      *            dateStop field's view
      */
     public void dateClick(final View view)
@@ -176,7 +170,7 @@ public class MainUIScreen
     /**
      * runs when the timeStart field is clicked * opens a dialog box to get the
      * start time then puts the data in the field
-     *
+     * 
      * @param v
      *            timeStart field's view
      */
@@ -209,7 +203,7 @@ public class MainUIScreen
 
     /**
      * this is the listener for the live map button.
-     *
+     * 
      * @param v
      *            the view of the button that was pressed
      */
@@ -222,7 +216,7 @@ public class MainUIScreen
 
     /**
      * starts historic view for all data points
-     *
+     * 
      * @param v
      *            the v return the history
      */
@@ -237,7 +231,7 @@ public class MainUIScreen
      * method called when the 'get history' button is pressed. his is just last
      * minute until we hook up the date/time controls. I don't know how they
      * work.
-     *
+     * 
      * @param v
      *            the view of the button that was pressed
      */
@@ -255,7 +249,7 @@ public class MainUIScreen
      * we are only using it to get search results from DbHandler and pass them
      * to the historic view, so we don't need to determine where the results
      * came from, just shove them in a map.
-     *
+     * 
      * @param resultCode
      *            this will be the DbHandler.DBHANDLER_QUERY_ID that went with
      *            the query, if any
@@ -279,7 +273,7 @@ public class MainUIScreen
 
     /**
      * method called when the data collect check box is clicked
-     *
+     * 
      * @param v
      *            the view of the check box
      */
@@ -352,7 +346,6 @@ public class MainUIScreen
                 editDateStart.setText(editDateStop.getText());
                 editTimeStart.setText(editTimeStop.getText());
             }
-
 
         }
     }

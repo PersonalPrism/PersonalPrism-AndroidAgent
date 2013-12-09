@@ -15,7 +15,7 @@ import android.location.Location;
  * @version 2013.12.8
  */
 public class AnimatedHistoricViewTest
-    //extends student.AndroidTestCase<AnimatedHistoricView>
+    // extends student.AndroidTestCase<AnimatedHistoricView>
     extends ActivityInstrumentationTestCase2<AnimatedHistoricView>
 {
     private AnimatedHistoricView view;
@@ -54,12 +54,13 @@ public class AnimatedHistoricViewTest
         bundle.putParcelableArrayList(
             DbHandler.DBHANDLER_LOCATION_RESULTS,
             locationsToAdd);
-        
-        view = this.launchActivity(
-            "io.github.personalprism.personalprism_droid",
-            AnimatedHistoricView.class,
-            bundle);
-        
+
+        view =
+            this.launchActivity(
+                "io.github.personalprism.personalprism_droid",
+                AnimatedHistoricView.class,
+                bundle);
+
         System.out.println("Activity about to start");
         System.out.println("Activity started");
 
@@ -86,7 +87,7 @@ public class AnimatedHistoricViewTest
      */
     public void testNext()
     {
-        //click(this.next);
+        // click(this.next);
 
         LatLng result = view.getCameraPosition().target;
         LatLng expected = new LatLng(0, 0);
@@ -99,9 +100,9 @@ public class AnimatedHistoricViewTest
      */
     public void testPrevious()
     {
-        //click(this.next);
-        //click(this.next);
-        //click(this.previous);
+        // click(this.next);
+        // click(this.next);
+        // click(this.previous);
         LatLng result = view.getCameraPosition().target;
         LatLng expected = new LatLng(0, 0);
         assertEquals(expected, result);

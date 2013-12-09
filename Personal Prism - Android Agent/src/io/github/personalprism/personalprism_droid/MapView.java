@@ -22,8 +22,9 @@ import java.util.Observer;
 
 // -------------------------------------------------------------------------
 /**
- * A live map view for Personal Prism. This listens on its own, faster than default background updates.
- *
+ * A live map view for Personal Prism. This listens on its own, faster than
+ * default background updates.
+ * 
  * @author Stuart Harvey (stu)
  * @version 2013.12.08
  */
@@ -35,13 +36,15 @@ public class MapView
 
     private sohail.aziz.service.MyResultReceiver receiver;
 
-    private GoogleMap           map;          // map display
-    private LocationSource      source;       // where realtime location
+    private GoogleMap                            map;     // map display
+    private LocationSource                       source;  // where realtime
+// location
 // updates are found
+
 
     /**
      * Creates a google map view, adds location gatherer.
-     *
+     * 
      * @param savedInstanceState
      *            ...?
      */
@@ -63,13 +66,12 @@ public class MapView
         // observe location updater to receive new locations in update()
         source.addObserver(this);
 
-        //result receiver for db queries
+        // result receiver for db queries
         receiver = new MyResultReceiver(new Handler());
         receiver.setReceiver(this);
 
         // display old locations on map
-        Intent intent =
-            DbHandler.locationQueryAllMaker(receiver);
+        Intent intent = DbHandler.locationQueryAllMaker(receiver);
         startService(intent);
 
         LatLng position = new LatLng(37.2166679, -80.416666);
@@ -79,7 +81,7 @@ public class MapView
 
     /**
      * Called when the location is updated.
-     *
+     * 
      * @param locationSource
      *            Observed location gatherer.
      * @param location
@@ -93,7 +95,7 @@ public class MapView
         // center camera
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(
             new LatLng(loc.getLatitude(), loc.getLongitude()),
-            18));//maybe dynamically calculate zoom in future
+            18));// maybe dynamically calculate zoom in future
 
         drawCircle(loc);
         drawMarker(loc);
@@ -102,7 +104,7 @@ public class MapView
 
     /**
      * Draws a circle with opacity 15/255 at the latest location.
-     *
+     * 
      * @param lastLocation
      *            The latest location update.
      */
@@ -118,13 +120,13 @@ public class MapView
         map.addCircle(circOpt);
     }
 
+
     /**
      * Draws markers on the map where old location data is.
      */
     private void drawMarker(Location latest)
     {
-        LatLng latlng =
-            new LatLng(latest.getLatitude(), latest.getLongitude());
+        LatLng latlng = new LatLng(latest.getLatitude(), latest.getLongitude());
 
         String titleData = new Date(latest.getTime()).toString();
 
@@ -140,7 +142,7 @@ public class MapView
 
     /**
      * Handling for a marker click.
-     *
+     * 
      * @param marker
      *            the marker that has been clicked.
      * @return true if using custom behavior, else false.
@@ -158,7 +160,9 @@ public class MapView
      */
     public void onReceiveResult(int resultCode, Bundle resultData)
     {
-        ArrayList<Location> oldLocations = resultData.getParcelableArrayList(DbHandler.DBHANDLER_LOCATION_RESULTS);
+        ArrayList<Location> oldLocations =
+            resultData
+                .getParcelableArrayList(DbHandler.DBHANDLER_LOCATION_RESULTS);
         if (oldLocations.size() > 0)
         {
             for (Location loc : oldLocations)
@@ -175,16 +179,19 @@ public class MapView
             }
         }
     }
-    
+
+
     /**
      * Returns a reference to the map for testing.
+     * 
      * @return the map.
      */
     public GoogleMap getMap()
     {
         return map;
     }
-    
+
+
     /**
      * Disable updates for testing.
      */

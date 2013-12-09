@@ -24,7 +24,7 @@ import java.util.List;
  * IntentService, so it uses Intents for activation and message passing. You
  * feed it a command in an intent and, depending on the command, a PendingIntent
  * to send a return message.
- *
+ * 
  * @author Hunter Morgan <kp1108> <automaticgiant@gmail.com>
  * @version Dec, 8, 2013
  */
@@ -37,8 +37,17 @@ public class DbHandler
      */
     public enum Command
     {
+        /**
+         * Enum for command that tells DB to log location.
+         */
         LOCATION_LOG,
+        /**
+         * Enum for command that is a location search.
+         */
         LOCATION_SEARCH,
+        /**
+         * When no command is given, enum is NONE.
+         */
         NONE
     }
 
@@ -67,11 +76,14 @@ public class DbHandler
                                                                             + "DBHANDLER_LOCATION_QUERY_COMPARATOR";
 
     /** The Constant DBHANDLER_QUERY_ID for a bundle extra key/resultCode. */
-    public static final String DBHANDLER_QUERY_ID                  =
+    public static final String  DBHANDLER_QUERY_ID                  =
                                                                         "io.github.personalprism.personalprism_droid.DbHandler."
                                                                             + "DBHANDLER_QUERY_ID";
 
-    private static final String PKGNAME = DbHandler.class.getPackage().getName();
+    private static final String PKGNAME                             =
+                                                                        DbHandler.class
+                                                                            .getPackage()
+                                                                            .getName();
 
     // DB4O db handle
     private ObjectContainer     db;
@@ -86,7 +98,7 @@ public class DbHandler
 
     /**
      * Instantiates a new named DbHandler.
-     *
+     * 
      * @param name
      *            the name
      */
@@ -98,7 +110,7 @@ public class DbHandler
 
     /**
      * Log location command helper.
-     *
+     * 
      * @param intent
      *            the intent
      */
@@ -156,7 +168,6 @@ public class DbHandler
     }
 
 
-
     @Override
     public void onDestroy()
     {
@@ -173,7 +184,7 @@ public class DbHandler
     /**
      * This method parses the sent Intent to get a command and optional callback
      * PendingIntent, and respond to the command.
-     *
+     * 
      * @param intent
      *            the intent
      */
@@ -211,7 +222,6 @@ public class DbHandler
                     logLocationHelper(intent);
                 }
 
-
                 break;
         }
     }
@@ -222,7 +232,7 @@ public class DbHandler
      * We need to pass in a DB4O native query Predicate and optional Comparator
      * to run the query. You will get back an array of Locations. Luckily, there
      * is a static method to create the intent.
-     *
+     * 
      * @param intent
      *            the intent
      */
@@ -265,7 +275,7 @@ public class DbHandler
     /**
      * Location query by date maker. Generates an intent to use for DbHandler
      * activation and query.
-     *
+     * 
      * @param startDate
      *            the start date
      * @param endDate
@@ -281,9 +291,7 @@ public class DbHandler
     {
         Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
         // set target explicitly
-        intent.setComponent(new ComponentName(
-            PKGNAME,
-            PKGNAME + ".DbHandler"));
+        intent.setComponent(new ComponentName(PKGNAME, PKGNAME + ".DbHandler"));
         // package receiver
         intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
 
@@ -320,7 +328,7 @@ public class DbHandler
      * sub-optimal. It should really be a QBE, not NQ so DB doesn't have to
      * parse all Locations. C'est la vie. Be careful. This doesn't implement
      * paging either, so this could get out of hand if we get a big data set.
-     *
+     * 
      * @param receiver
      *            the receiver
      * @return the intent
@@ -329,9 +337,7 @@ public class DbHandler
     {
         Intent intent = new Intent(Command.LOCATION_SEARCH.toString());
         // set target explicitly
-        intent.setComponent(new ComponentName(
-            PKGNAME,
-            PKGNAME + ".DbHandler"));
+        intent.setComponent(new ComponentName(PKGNAME, PKGNAME + ".DbHandler"));
         // package receiver
         intent.putExtra(DBHANDLER_REQUEST_CALLBACK, receiver);
 
@@ -360,26 +366,10 @@ public class DbHandler
         return intent;
     }
 
-//    /**
-//     * Attempt at retrieving a list of locations.
-//     *
-//     * @return an object set of locations.
-//     */
-//    public static ArrayList<Location> getLocationList()
-//    {
-//        ObjectContainer tempDB =
-//            Db4oEmbedded.openFile(
-//                Db4oEmbedded.newConfiguration(),
-//                MainUIScreen.DB4OFILENAME);
-//        ArrayList<Location> locationList =
-//            new ArrayList<Location>(tempDB.query(Location.class));
-//        tempDB.close();
-//        return locationList;
-//    }
 
     /**
      * Record count snippet from teh internets.
-     *
+     * 
      * @param db
      *            the db
      * @return the int

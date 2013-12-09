@@ -13,11 +13,12 @@ import java.util.Observer;
  * alarms for polling, would we?). The purpose of this class is for
  * extensibility. I inted it to hold various PrismSources and facilitate
  * programmatic configuration menus and preferences storage behavior.
- *
+ * 
  * @author Hunter Morgan <kp1108> <automaticgiant@gmail.com>
  * @version 2013-12-07
  */
-@Deprecated //for now
+@Deprecated
+// for now
 public class SourceManager
     implements Observer
 {
@@ -28,7 +29,7 @@ public class SourceManager
     /**
      * Gets the location source. We need a getter in case we need to turn it on
      * and off and reconfigure it. For now,
-     *
+     * 
      * @return the location source
      */
     public LocationSource getLocationSource()
@@ -39,7 +40,7 @@ public class SourceManager
 
     /**
      * Instantiates a new source manager. It will be set to log.
-     *
+     * 
      * @param context
      *            the context
      */
