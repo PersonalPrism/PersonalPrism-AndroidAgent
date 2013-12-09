@@ -41,11 +41,11 @@ public class MainUIScreen
     /**
      * Public for testing.
      */
-    Calendar            startTime;
+    Calendar                    startTime;
     /**
      * Public for testing.
      */
-    Calendar            stopTime;
+    Calendar                    stopTime;
 
     /** The Constant DEBUG. */
     public static final boolean DEBUG = true;
@@ -58,15 +58,16 @@ public class MainUIScreen
     public static String        db4oFilename;
 
     private EditText            sampleRate;
-    
+
     /**
      * Public for testing.
      */
-    DatePickerDialog mDatePicker;
+    DatePickerDialog            mDatePicker;
     /**
      * Public for testing.
      */
-    TimePickerDialog mTimePicker;
+    TimePickerDialog            mTimePicker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
