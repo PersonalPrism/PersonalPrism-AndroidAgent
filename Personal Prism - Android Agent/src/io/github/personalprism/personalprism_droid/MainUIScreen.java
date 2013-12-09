@@ -38,8 +38,14 @@ public class MainUIScreen
     extends Activity
     implements sohail.aziz.service.MyResultReceiver.Receiver
 {
-    private Calendar            startTime;
-    private Calendar            stopTime;
+    /**
+     * Public for testing.
+     */
+    Calendar            startTime;
+    /**
+     * Public for testing.
+     */
+    Calendar            stopTime;
 
     /** The Constant DEBUG. */
     public static final boolean DEBUG = true;
@@ -52,7 +58,15 @@ public class MainUIScreen
     public static String        db4oFilename;
 
     private EditText            sampleRate;
-
+    
+    /**
+     * Public for testing.
+     */
+    DatePickerDialog mDatePicker;
+    /**
+     * Public for testing.
+     */
+    TimePickerDialog mTimePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -143,7 +157,6 @@ public class MainUIScreen
         int mMonth = mcurrentDate.get(Calendar.MONTH);
         int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
         final TextView text = (TextView)view;
-        DatePickerDialog mDatePicker;
         mDatePicker =
             new DatePickerDialog(view.getContext(), new OnDateSetListener() {
                 public void onDateSet(
@@ -180,7 +193,6 @@ public class MainUIScreen
         int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
         int minute = mcurrentTime.get(Calendar.MINUTE);
         final TextView text = (TextView)v;
-        TimePickerDialog mTimePicker;
         mTimePicker =
             new TimePickerDialog(
                 v.getContext(),
